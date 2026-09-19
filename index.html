@@ -1,0 +1,3364 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Опросик в честь 20-летия</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Nunito:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fdf7ef;
+    --bg-alt: #f6ecdd;
+    --card: #ffffff;
+    --ink: #2f2038;
+    --ink-soft: #6b5a76;
+    --accent: #7b3fa0;
+    --accent-soft: #efe2f7;
+    --gold: #e0a52e;
+    --ok: #2f8f5b;
+    --ok-bg: #e4f5ea;
+    --bad: #c0503f;
+    --bad-bg: #fbe8e4;
+    --line: #e7dbcb;
+    --code-bg: #2f2038;
+    --code-ink: #ffd479;
+    --display: 'Fraunces', Georgia, serif;
+    --body: 'Nunito', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 12% 8%, rgba(224,165,46,.16), transparent 42%),
+      radial-gradient(circle at 88% 4%, rgba(123,63,160,.14), transparent 40%),
+      var(--bg);
+    color: var(--ink);
+    font-family: var(--body);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 64px;
+  }
+
+  .wrap { width: 100%; max-width: 620px; }
+
+  .topbar {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+    font-size: .85rem;
+    color: var(--ink-soft);
+  }
+  .topbar strong { color: var(--accent); font-weight: 700; }
+
+  .track { height: 6px; background: var(--bg-alt); border-radius: 99px; overflow: hidden; margin-bottom: 18px; }
+  .track > div { height: 100%; background: linear-gradient(90deg, var(--gold), var(--accent)); border-radius: 99px; transition: width .35s ease; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 28px 26px 26px;
+    box-shadow: 0 14px 34px -22px rgba(47,32,56,.4);
+    position: relative;
+    animation: rise .34s ease;
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+  h1 { font-family: var(--display); font-size: clamp(1.7rem, 5.5vw, 2.3rem); margin: 0 0 12px; line-height: 1.15; }
+  h2 { font-family: var(--display); font-size: clamp(1.25rem, 4.4vw, 1.6rem); margin: 0 0 8px; line-height: 1.25; font-weight: 700; }
+  .q { font-family: var(--display); font-size: clamp(1.2rem, 4.2vw, 1.5rem); font-weight: 700; line-height: 1.3; margin: 0; }
+  .hint { color: var(--ink-soft); font-size: .92rem; margin: 10px 0 0; line-height: 1.5; }
+  p.lead { font-size: 1.02rem; line-height: 1.6; margin: 0 0 6px; }
+
+  label.field { display: block; margin-top: 18px; }
+  input[type=text], textarea {
+    width: 100%;
+    font-family: var(--body);
+    font-size: 1rem;
+    color: var(--ink);
+    background: var(--bg);
+    border: 1.5px solid var(--line);
+    border-radius: 11px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color .18s ease;
+  }
+  input[type=text]:focus, textarea:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 86px; }
+
+  .row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; align-items: center; }
+
+  button {
+    font-family: var(--body);
+    font-size: .97rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 11px;
+    padding: 11px 20px;
+    cursor: pointer;
+    transition: transform .12s ease, filter .18s ease;
+  }
+  button:active { transform: translateY(1px); }
+  button:disabled { opacity: .45; cursor: default; }
+  .primary { background: var(--accent); color: #fff; }
+  .primary:hover:not(:disabled) { filter: brightness(1.08); }
+  .ghost { background: var(--accent-soft); color: var(--accent); }
+  .ghost:hover:not(:disabled) { filter: brightness(.97); }
+  .wide { width: 100%; }
+
+  .verdict { margin-top: 14px; font-weight: 700; font-size: 1rem; }
+  .verdict.ok { color: var(--ok); animation: popIn .4s ease; }
+  .verdict.bad { color: var(--bad); animation: shakeX .45s ease; }
+  .verdict.neutral { color: var(--accent); animation: popIn .4s ease; }
+  @keyframes popIn { 0% { opacity: 0; transform: scale(.85); } 60% { opacity: 1; transform: scale(1.05); } 100% { transform: scale(1); } }
+  @keyframes shakeX {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); } 40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); } 80% { transform: translateX(4px); }
+  }
+
+  button.q {
+    font-family: var(--display); font-weight: 700; line-height: 1.3;
+    color: var(--ink); background: none; border: 2px dashed var(--accent); border-radius: 12px;
+    padding: 14px 16px; cursor: pointer; display: block; width: 100%; text-align: center;
+    transition: background .2s ease, transform .15s ease;
+  }
+  button.q:hover { background: var(--accent-soft); }
+  button.q:active { transform: scale(.98); }
+
+  .stage-stats { font-size: .78rem; color: var(--ink-soft); margin-top: 8px; }
+
+  .stealth { color: var(--card); transition: color .45s ease; cursor: default; }
+  .stealth:hover { color: var(--ink); }
+
+  .codebox {
+    margin-top: 14px;
+    font-family: var(--mono);
+    font-size: .88rem;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    border-radius: 10px;
+    padding: 12px 14px;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .guesses { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 14px; }
+  .chip { font-size: .82rem; font-weight: 700; padding: 5px 11px; border-radius: 8px; }
+  .chip.ok { background: var(--ok-bg); color: var(--ok); }
+  .chip.bad { background: var(--bad-bg); color: var(--bad); }
+  .counter { margin-top: 12px; font-size: .9rem; color: var(--ink-soft); font-weight: 600; }
+
+  /* Q4 — фейковая реклама */
+  .ad {
+    position: absolute;
+    top: -14px;
+    right: -10px;
+    background: #d62300;
+    color: #ffc72c;
+    font-family: var(--body);
+    font-weight: 700;
+    font-size: .82rem;
+    line-height: 1.25;
+    text-align: center;
+    padding: 9px 13px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px -8px rgba(0,0,0,.45);
+    cursor: pointer;
+    transform: rotate(4deg);
+    animation: rise .4s ease;
+    z-index: 5;
+  }
+  .ad span { display: block; font-size: .95rem; letter-spacing: .01em; }
+  @media (max-width: 520px) { .ad { top: -12px; right: -4px; font-size: .74rem; padding: 7px 10px; } }
+
+  /* Q8 — кликер */
+  .clicker-stage { position: relative; min-height: 360px; margin-top: 16px; overflow: hidden; border-radius: 12px; background: var(--bg-alt); }
+  .clicker-core { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; z-index: 3; }
+  .bigbutton {
+    width: 118px; height: 118px; border-radius: 50%;
+    background: var(--accent);
+    color: #fff; font-size: 1.05rem; font-weight: 700;
+    box-shadow: 0 10px 22px -10px rgba(123,63,160,.8);
+  }
+  .clicks { font-family: var(--display); font-size: 2rem; font-weight: 700; }
+  .noise { position: absolute; font-family: var(--body); font-weight: 700; color: var(--accent); opacity: .55; pointer-events: none; z-index: 2; white-space: normal; max-width: calc(100% - 16px); overflow-wrap: anywhere; text-align: center; }
+  .noise.code { font-family: var(--mono); font-weight: 600; color: var(--ink-soft); opacity: .5; font-size: .78rem; }
+
+  .timer-tick { animation: timerTick .34s ease; }
+  @keyframes timerTick {
+    0% { opacity: .45; transform: scale(1.08); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  /* Q18 — скрытые надписи */
+  .haystack { position: relative; min-height: 480px; margin-top: 14px; border-radius: 12px; overflow: hidden; }
+  .straw { position: absolute; white-space: nowrap; cursor: default; transition: color .25s ease, transform .25s ease, opacity .25s ease, text-shadow .25s ease; }
+  .straw:hover { color: var(--ink-soft) !important; }
+  .straw.correct-target:hover {
+    color: rgba(123,63,160,.42) !important;
+    transform: scale(1.06);
+    text-shadow: 0 0 10px rgba(123,63,160,.16);
+  }
+  body.v2-theme .straw.correct-target:hover {
+    color: rgba(201,166,255,.48) !important;
+    text-shadow: 0 0 12px rgba(201,166,255,.18);
+  }
+
+  .final-secret {
+    display: block;
+    margin-top: 34px;
+    font-family: var(--mono);
+    font-size: .74rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    color: #fbf6ee;
+    transition: color .5s ease;
+    cursor: default;
+  }
+  .final-secret:hover { color: var(--ink-soft); }
+
+  .switchline { margin-top: 20px; font-size: .84rem; color: var(--ink-soft); text-align: center; }
+  .switchline button { background: none; color: var(--accent); padding: 4px 6px; text-decoration: underline; font-size: .84rem; }
+
+  /* ===================== ВЕРСИЯ II — тёмная тема ===================== */
+  body.v2-theme {
+    --bg: #17101f;
+    --bg-alt: #221733;
+    --card: #221733;
+    --ink: #f2e9ff;
+    --ink-soft: #b6a0cf;
+    --accent: #c9a6ff;
+    --accent-soft: #33234a;
+    --gold: #f2b705;
+    --ok: #8fd19e;
+    --ok-bg: #223529;
+    --bad: #e98a7e;
+    --bad-bg: #3a2224;
+    --line: #3a2850;
+    --code-bg: #0f0a17;
+    --code-ink: #f2b705;
+  }
+  body.v2-theme .card {
+    box-shadow: 0 18px 40px -20px rgba(0,0,0,.6);
+    position: relative;
+    animation: v2Materialize .75s cubic-bezier(.2,.8,.3,1);
+  }
+  body.v2-theme .topbar { animation: v2FadeIn .5s ease; }
+  @keyframes v2Materialize {
+    0% { opacity: 0; transform: scale(.92) translateY(16px); filter: blur(6px); }
+    60% { filter: blur(0); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes v2FadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+  body.v2-theme { padding-top: 46px; }
+  body.v2-theme .q { text-align: center; font-size: clamp(1.5rem, 6vw, 2.1rem); }
+  body.v2-theme .row { justify-content: center; }
+  body.v2-theme .hint { text-align: center; }
+
+  /* ===================== ЭПИЧНОЕ РАЗРУШЕНИЕ ===================== */
+  @keyframes epicShake {
+    0%, 100% { transform: translate(0,0); }
+    10% { transform: translate(-4px,3px) rotate(-.18deg); }
+    20% { transform: translate(5px,-4px) rotate(.18deg); }
+    30% { transform: translate(-7px,2px) rotate(-.24deg); }
+    40% { transform: translate(8px,6px) rotate(.22deg); }
+    50% { transform: translate(-6px,-7px) rotate(-.18deg); }
+    60% { transform: translate(10px,3px) rotate(.28deg); }
+    70% { transform: translate(-8px,-5px) rotate(-.2deg); }
+    80% { transform: translate(6px,7px) rotate(.16deg); }
+    90% { transform: translate(-4px,2px) rotate(-.12deg); }
+  }
+  body.epic-shake { animation: epicShake .85s linear 1; }
+  body.epic-shake-long { animation: epicShake .82s linear infinite; }
+
+  @keyframes v2ShakeSmall {
+    0%,100% { transform: translate(0,0) rotate(0); }
+    20% { transform: translate(-2px,1px) rotate(-.08deg); }
+    40% { transform: translate(3px,-2px) rotate(.09deg); }
+    60% { transform: translate(-3px,2px) rotate(-.07deg); }
+    80% { transform: translate(2px,1px) rotate(.06deg); }
+  }
+  @keyframes v2ShakeMedium {
+    0%,100% { transform: translate(0,0) rotate(0); }
+    16% { transform: translate(-6px,3px) rotate(-.2deg); }
+    32% { transform: translate(6px,-5px) rotate(.22deg); }
+    48% { transform: translate(-7px,4px) rotate(-.2deg); }
+    64% { transform: translate(8px,5px) rotate(.24deg); }
+    80% { transform: translate(-5px,-4px) rotate(-.16deg); }
+  }
+  @keyframes v2ShakeLarge {
+    0%,100% { transform: translate(0,0) rotate(0) scale(1); filter: none; }
+    10% { transform: translate(-12px,7px) rotate(-.5deg) scale(1.002); filter: contrast(1.08); }
+    22% { transform: translate(10px,-9px) rotate(.55deg) scale(.998); }
+    34% { transform: translate(-15px,4px) rotate(-.58deg) scale(1.003); filter: saturate(1.35); }
+    46% { transform: translate(14px,10px) rotate(.52deg) scale(.998); }
+    58% { transform: translate(-11px,-8px) rotate(-.48deg) scale(1.004); filter: contrast(1.18); }
+    70% { transform: translate(16px,5px) rotate(.6deg) scale(.997); }
+    82% { transform: translate(-9px,8px) rotate(-.42deg) scale(1.003); filter: saturate(1.5) contrast(1.1); }
+  }
+  body.v2-shake-small { animation: v2ShakeSmall .48s cubic-bezier(.36,.07,.19,.97) 1; }
+  body.v2-shake-medium { animation: v2ShakeMedium .72s cubic-bezier(.36,.07,.19,.97) 1; }
+  body.v2-shake-large { animation: v2ShakeLarge 1.35s cubic-bezier(.36,.07,.19,.97) 1; }
+
+  /* Третий удар — уже почти поломка: вспышки, цветовой сдвиг и короткие рывки. */
+  body.v2-catastrophe {
+    animation: v2ShakeLarge 1.35s cubic-bezier(.36,.07,.19,.97) 1, v2Catastrophe .23s steps(2,end) 4;
+  }
+  body.v2-catastrophe::after {
+    content: ''; position: fixed; inset: 0; z-index: 54; pointer-events: none;
+    background: repeating-linear-gradient(0deg, transparent 0 7px, rgba(255,255,255,.055) 7px 9px);
+    mix-blend-mode: screen;
+    animation: v2ScanBurst .18s steps(2,end) 6;
+  }
+  @keyframes v2Catastrophe {
+    0%,100% { opacity: 1; }
+    50% { opacity: .62; }
+  }
+  @keyframes v2ScanBurst {
+    0%,100% { transform: translateY(0); opacity: .05; }
+    50% { transform: translateY(8px); opacity: .7; }
+  }
+
+  body.v2-reveal-seq .hud-ticker,
+  body.v2-reveal-seq .hud-telemetry,
+  body.v2-reveal-seq .hud-wave,
+  body.v2-reveal-seq .version-toggle,
+  body.v2-reveal-seq .debug-fab,
+  body.v2-reveal-seq .card,
+  body.v2-reveal-seq .topbar,
+  body.v2-reveal-seq .global-timer {
+    opacity: 0;
+    animation-fill-mode: forwards;
+  }
+  body.v2-reveal-seq .hud-ticker { animation: v2UiIn .9s cubic-bezier(.16,1,.3,1) 2.7s forwards !important; }
+  body.v2-reveal-seq .hud-telemetry { animation: v2TelemetryIn 1.1s cubic-bezier(.16,1,.3,1) 3.25s forwards !important; }
+  body.v2-reveal-seq .hud-wave { animation: v2WaveIn 1.2s cubic-bezier(.16,1,.3,1) 3.75s forwards !important; }
+  body.v2-reveal-seq .version-toggle { animation: v2UiIn .95s cubic-bezier(.16,1,.3,1) 4.25s forwards !important; }
+  body.v2-reveal-seq .debug-fab { animation: v2UiIn .95s cubic-bezier(.16,1,.3,1) 4.65s forwards !important; }
+  body.v2-reveal-seq .topbar { animation: v2TopbarIn 1.05s cubic-bezier(.16,1,.3,1) 5.05s forwards !important; }
+  body.v2-reveal-seq .card { animation: v2CardIn 1.35s cubic-bezier(.16,1,.3,1) 5.65s forwards !important; }
+  body.v2-reveal-seq .global-timer { animation: v2UiIn 1s cubic-bezier(.16,1,.3,1) 6.35s forwards !important; }
+  body.v2-reveal-seq .card h1 { opacity: 0; animation: v2TextIn .9s cubic-bezier(.16,1,.3,1) 6.75s forwards !important; }
+  body.v2-reveal-seq .card p { opacity: 0; animation: v2TextIn .85s cubic-bezier(.16,1,.3,1) 7.2s forwards !important; }
+  body.v2-reveal-seq .card button { opacity: 0; animation: v2ButtonIn 1s cubic-bezier(.16,1,.3,1) 7.75s forwards !important; }
+  /* После кинематографичного появления не запускаем базовые анимации повторно при снятии v2-reveal-seq. */
+  body.v2-reveal-done .hud-ticker,
+  body.v2-reveal-done .hud-telemetry,
+  body.v2-reveal-done .hud-wave,
+  body.v2-reveal-done .version-toggle,
+  body.v2-reveal-done .debug-fab,
+  body.v2-reveal-done .card,
+  body.v2-reveal-done .topbar,
+  body.v2-reveal-done .global-timer {
+    opacity: 1;
+    animation: none !important;
+  }
+  body.v2-reveal-done .hud-wave {
+    transform: translateX(-50%) !important;
+  }
+  body.v2-reveal-done .card h1,
+  body.v2-reveal-done .card p,
+  body.v2-reveal-done .card button {
+    opacity: 1;
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+    clip-path: none !important;
+  }
+  @keyframes v2UiIn {
+    0% { opacity: 0; transform: translateY(14px) scale(.94); filter: blur(10px); clip-path: inset(0 38% 0 38%); }
+    58% { opacity: .92; transform: translateY(-2px) scale(1.015); filter: blur(1px); clip-path: inset(0 0 0 0); }
+    78% { transform: translateY(1px) scale(.997); }
+    100% { opacity: 1; transform: none; filter: blur(0); clip-path: inset(0 0 0 0); }
+  }
+  @keyframes v2TelemetryIn {
+    0% { opacity: 0; transform: translateX(26px) scaleX(.55); filter: blur(10px); }
+    40% { opacity: .75; transform: translateX(-4px) scaleX(1.03); filter: blur(2px); }
+    70% { transform: translateX(3px); }
+    100% { opacity: 1; transform: none; filter: blur(0); }
+  }
+  @keyframes v2WaveIn {
+    0% { opacity: 0; transform: translateX(-50%) translateY(16px) scale(.75); filter: blur(12px); }
+    35% { opacity: 1; transform: translateX(-50%) translateY(-3px) scale(1.08); filter: blur(1px); }
+    55% { transform: translateX(-50%) translateY(2px) scale(.98); }
+    100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); filter: blur(0); }
+  }
+  @keyframes v2TopbarIn {
+    0% { opacity: 0; transform: translateY(-22px) scaleY(.7); filter: blur(12px); }
+    45% { opacity: 1; transform: translateY(3px) scaleY(1.04); filter: blur(2px); }
+    65% { transform: translateY(-2px) scaleY(.99); }
+    100% { opacity: 1; transform: none; filter: blur(0); }
+  }
+  @keyframes v2CardIn {
+    0% { opacity: 0; transform: perspective(900px) rotateX(7deg) scale(.78) translateY(45px); filter: blur(18px) brightness(.2); box-shadow: 0 0 0 rgba(0,0,0,0); }
+    35% { opacity: .45; transform: perspective(900px) rotateX(-2deg) scale(.98) translateY(-8px); filter: blur(5px) brightness(.65); box-shadow: 0 0 55px rgba(201,166,255,.18); }
+    62% { opacity: 1; transform: perspective(900px) rotateX(1deg) scale(1.025) translateY(2px); filter: blur(1px) brightness(1.12); box-shadow: 0 0 100px rgba(201,166,255,.22); }
+    78% { transform: perspective(900px) rotateX(0) scale(.997); }
+    100% { opacity: 1; transform: perspective(900px) rotateX(0) scale(1); filter: blur(0) brightness(1); box-shadow: 0 18px 40px -20px rgba(0,0,0,.6); }
+  }
+  @keyframes v2TextIn {
+    0% { opacity: 0; transform: translateY(18px) scale(.96); filter: blur(10px); }
+    55% { opacity: 1; transform: translateY(-3px) scale(1.015); filter: blur(1px); }
+    100% { opacity: 1; transform: none; filter: blur(0); }
+  }
+  @keyframes v2ButtonIn {
+    0% { opacity: 0; transform: translateY(16px) scale(.82); filter: blur(8px); }
+    45% { opacity: 1; transform: translateY(-5px) scale(1.08); filter: blur(0); }
+    68% { transform: translateY(2px) scale(.98); }
+    100% { opacity: 1; transform: none; filter: blur(0); }
+  }
+
+  .crack-overlay { position: fixed; inset: 0; z-index: 55; pointer-events: none; overflow: hidden; }
+  .crack-line {
+    position: absolute; height: 3px; width: 0;
+    background: linear-gradient(90deg, transparent, #fff, #fff, transparent);
+    box-shadow: 0 0 12px 2px rgba(255,255,255,.8);
+    transform-origin: left center;
+    animation: crackGrow .3s ease-out forwards;
+  }
+  @keyframes crackGrow { from { width: 0; opacity: 1; } to { width: 150vmax; opacity: .85; } }
+
+  .flash-overlay { position: fixed; inset: 0; z-index: 56; background: #000; opacity: 0; pointer-events: none; }
+
+  /* Медленное падение интерфейса первой версии перед уходом в чёрный экран. */
+  .v1-fall-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .v1-falling-copy {
+    will-change: transform, opacity, filter;
+    transform-origin: 50% 50%;
+    pointer-events: none;
+    backface-visibility: hidden;
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+  .v1-falling-copy-active {
+    /* Одна непрерывная траектория: сначала резкий подъём по диагонали,
+       затем плавная дуга и без остановки — ускоряющееся падение вниз. */
+    animation: v1OvalFall 2.15s linear var(--fall-delay) forwards;
+  }
+  @keyframes v1OvalFall {
+    0% {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+      filter: blur(0) brightness(1);
+    }
+    16% {
+      opacity: 1;
+      transform: translate3d(var(--fall-x1), var(--fall-y1), 0) rotate(calc(var(--fall-rotate) * -.18)) scale(1.015);
+      filter: blur(0) brightness(1.03);
+    }
+    32% {
+      opacity: 1;
+      transform: translate3d(var(--fall-x2), var(--fall-y2), 0) rotate(calc(var(--fall-rotate) * -.35)) scale(1.025);
+      filter: blur(0) brightness(1.04);
+    }
+    48% {
+      opacity: .995;
+      transform: translate3d(var(--fall-x3), var(--fall-y3), 0) rotate(calc(var(--fall-rotate) * .05)) scale(1.01);
+      filter: blur(.15px) brightness(1);
+    }
+    64% {
+      opacity: .985;
+      transform: translate3d(var(--fall-x4), var(--fall-y4), 0) rotate(calc(var(--fall-rotate) * .5)) scale(.98);
+      filter: blur(.5px) brightness(.92);
+    }
+    82% {
+      opacity: .97;
+      transform: translate3d(var(--fall-x5), var(--fall-y5), 0) rotate(calc(var(--fall-rotate) * .78)) scale(.95);
+      filter: blur(1px) brightness(.82);
+    }
+    100% {
+      opacity: .92;
+      transform: translate3d(var(--fall-x6), var(--fall-distance), 0) rotate(var(--fall-rotate)) scale(.9);
+      filter: blur(2.5px) brightness(.68);
+    }
+  }
+
+  .version-toggle {
+    position: fixed; right: 14px; bottom: 14px; z-index: 30;
+    background: var(--accent); color: var(--card);
+    padding: 9px 16px; border-radius: 99px; font-size: .82rem;
+    box-shadow: 0 8px 18px -8px rgba(0,0,0,.4);
+  }
+
+
+  /* ---------- Переход между версиями по кнопке ---------- */
+  .version-switch-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 95;
+    pointer-events: none;
+    overflow: hidden;
+    opacity: 0;
+    background:
+      radial-gradient(circle at 50% 50%, var(--switch-center, rgba(214,205,224,.92)) 0%, rgba(18,12,27,.82) 42%, rgba(4,3,8,.98) 100%);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+  .version-switch-overlay::before {
+    content: '';
+    position: absolute;
+    inset: -20%;
+    background: repeating-linear-gradient(0deg, transparent 0 5px, rgba(255,255,255,.045) 5px 6px);
+    opacity: .35;
+    transform: translateY(-100%);
+  }
+  .version-switch-overlay::after {
+    content: '';
+    position: absolute;
+    width: 22vw; height: 22vw; min-width: 140px; min-height: 140px;
+    left: 50%; top: 50%;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.28);
+    box-shadow:
+      0 0 0 1px rgba(197,157,255,.12),
+      0 0 45px rgba(177,118,235,.22),
+      inset 0 0 35px rgba(255,255,255,.06);
+    transform: translate(-50%,-50%) scale(.05);
+    opacity: 0;
+  }
+  body.version-switching #app {
+    animation: none;
+    transform: none;
+    filter: none;
+  }
+  body.version-switching .version-switch-overlay {
+    animation: versionCurtainIn 1.05s cubic-bezier(.22,.7,.25,1) forwards;
+  }
+  body.version-switching .version-switch-overlay::before {
+    animation: versionScanIn 1.05s cubic-bezier(.22,.7,.25,1) forwards;
+  }
+  body.version-switching .version-switch-overlay::after {
+    animation: versionPulseIn 1.05s cubic-bezier(.2,.8,.25,1) forwards;
+  }
+  body.version-switch-in #app {
+    animation: none;
+    transform: none;
+    filter: none;
+  }
+  body.version-switch-in .version-switch-overlay {
+    opacity: 1;
+    animation: versionCurtainOut 1.15s cubic-bezier(.22,.7,.25,1) .05s forwards;
+  }
+  body.version-switch-in .version-switch-overlay::before {
+    animation: versionScanOut 1.15s cubic-bezier(.22,.7,.25,1) forwards;
+  }
+  body.version-switch-in .version-switch-overlay::after {
+    animation: versionPulseOut 1.15s cubic-bezier(.2,.8,.25,1) forwards;
+  }
+  @keyframes versionSwitchOut {
+    0% { opacity: 1; transform: scale(1) rotate(0deg); filter: blur(0); }
+    38% { opacity: .92; transform: scale(.985) rotate(-.25deg); filter: blur(.4px); }
+    72% { opacity: .48; transform: scale(.965) rotate(.45deg); filter: blur(2px); }
+    100% { opacity: 0; transform: scale(.91) rotate(-.7deg); filter: blur(8px); }
+  }
+  @keyframes versionCurtainIn {
+    0% { opacity: 0; transform: scale(1.08); }
+    42% { opacity: .36; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes versionScanIn {
+    0% { transform: translateY(-100%) skewY(-4deg); opacity: 0; }
+    35% { opacity: .65; }
+    100% { transform: translateY(100%) skewY(-4deg); opacity: .15; }
+  }
+  @keyframes versionPulseIn {
+    0% { transform: translate(-50%,-50%) scale(.05); opacity: 0; }
+    42% { opacity: .8; }
+    100% { transform: translate(-50%,-50%) scale(16); opacity: 0; }
+  }
+  @keyframes versionSwitchIn {
+    0% { opacity: 0; transform: scale(1.055) translateY(10px); filter: blur(8px); }
+    28% { opacity: .65; transform: scale(1.018) translateY(2px); filter: blur(3px); }
+    64% { opacity: 1; transform: scale(.998) translateY(0); filter: blur(.5px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+  }
+  @keyframes versionCurtainOut {
+    0% { opacity: 1; transform: scale(1); }
+    38% { opacity: .95; transform: scale(1.01); }
+    100% { opacity: 0; transform: scale(1.035); }
+  }
+  @keyframes versionScanOut {
+    0% { transform: translateY(-100%) skewY(-4deg); opacity: .3; }
+    100% { transform: translateY(100%) skewY(-4deg); opacity: 0; }
+  }
+  @keyframes versionPulseOut {
+    0% { transform: translate(-50%,-50%) scale(.15); opacity: .7; }
+    100% { transform: translate(-50%,-50%) scale(18); opacity: 0; }
+  }
+
+  /* ===================== ВЕРСИЯ II — декоративный HUD-мусор ===================== */
+  body.v2-theme::before {
+    content: ''; position: fixed; inset: 0; z-index: 4; pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0px, rgba(255,255,255,.025) 1px, transparent 1px, transparent 3px);
+    mix-blend-mode: overlay;
+  }
+  body.v2-theme .q {
+    position: relative;
+    animation: glitchFlicker 6.5s infinite;
+  }
+  @keyframes glitchFlicker {
+    0%, 95%, 100% { text-shadow: none; transform: none; }
+    96% { text-shadow: -2px 0 #ff5e7a, 2px 0 #5ecbff; transform: translateX(1px); }
+    97% { text-shadow: 2px 0 #ff5e7a, -2px 0 #5ecbff; transform: translateX(-1px); }
+    98% { text-shadow: -1px 0 #ff5e7a, 1px 0 #5ecbff; transform: translateX(1px); }
+    99% { text-shadow: none; transform: none; }
+  }
+
+  .hud-ticker {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 25;
+    background: #0f0a17; color: #8267a8; font-family: var(--mono); font-size: .7rem;
+    padding: 5px 0; overflow: hidden; white-space: nowrap; border-bottom: 1px solid var(--line);
+  }
+  .hud-ticker span { display: inline-block; padding-left: 100%; animation: hudScroll 26s linear infinite; }
+  @keyframes hudScroll { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+
+  .hud-telemetry {
+    position: fixed; top: 34px; left: 8px; z-index: 25;
+    font-family: var(--mono); font-size: .65rem; color: #7a5ea3; line-height: 1.55;
+    pointer-events: none; opacity: .85;
+  }
+  .hud-telemetry b { color: var(--accent); }
+  @media (max-width: 640px) { .hud-telemetry { display: none; } }
+
+  .hud-corner { position: absolute; width: 14px; height: 14px; border-color: var(--accent); opacity: .8; pointer-events: none; }
+  .hud-tl { top: -2px; left: -2px; border-top: 2px solid; border-left: 2px solid; }
+  .hud-tr { top: -2px; right: -2px; border-top: 2px solid; border-right: 2px solid; }
+  .hud-bl { bottom: -2px; left: -2px; border-bottom: 2px solid; border-left: 2px solid; }
+  .hud-br { bottom: -2px; right: -2px; border-bottom: 2px solid; border-right: 2px solid; }
+
+  .hud-wave {
+    position: fixed; left: 50%; bottom: 58px; transform: translateX(-50%); z-index: 22;
+    display: flex; flex-direction: column; align-items: center; gap: 4px; pointer-events: none; opacity: .85;
+  }
+  .hud-wave .bars { display: flex; align-items: flex-end; gap: 2px; height: 20px; }
+  .hud-wave .bars span { width: 3px; background: var(--accent); border-radius: 2px; animation: waveBounce 1.1s ease-in-out infinite; }
+  @keyframes waveBounce { 0%, 100% { height: 4px; } 50% { height: 18px; } }
+  .hud-wave .lbl { font-family: var(--mono); font-size: .6rem; color: #7a5ea3; letter-spacing: .04em; }
+
+  .global-timer {
+    position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 21;
+    background: var(--card); border: 1px solid var(--line); color: var(--ink);
+    font-family: var(--mono); font-size: .78rem; padding: 7px 14px; border-radius: 99px;
+    box-shadow: 0 8px 18px -8px rgba(0,0,0,.35); white-space: nowrap;
+    animation: globalTimerIn .4s ease;
+  }
+  @keyframes globalTimerIn {
+    from { opacity: 0; transform: translate(-50%, 10px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+  }
+  .global-timer span { color: var(--accent); font-weight: 700; display: inline-block; }
+
+  /* ===================== СЛУЖЕБНАЯ ПАНЕЛЬ (код полного доступа) ===================== */
+  .debug-fab {
+    position: fixed; left: 14px !important; right: auto !important; bottom: 14px !important; z-index: 40;
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--line); color: var(--ink);
+    font-size: 1.1rem; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0; text-align: center;
+    box-shadow: 0 8px 18px -8px rgba(0,0,0,.5);
+  }
+  .debug-panel {
+    position: fixed; left: 14px; bottom: 60px; z-index: 40;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px; max-width: 280px; flex-direction: column; gap: 6px;
+    box-shadow: 0 14px 34px -18px rgba(0,0,0,.5); font-size: .78rem;
+  }
+  .debug-row { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+  .debug-label { color: var(--ink-soft); width: 22px; font-weight: 700; }
+  .debug-chip {
+    padding: 3px 7px; font-size: .72rem; font-weight: 600;
+    background: var(--accent-soft); color: var(--accent); border-radius: 6px;
+  }
+
+  /* ===================== ВЕРСИЯ II — компоненты ===================== */
+  .locked-box { text-align: center; padding: 26px 10px; }
+  .locked-box .big { font-family: var(--display); font-size: 1.6rem; color: var(--accent); }
+
+  .snake-launch { text-align: center; padding: 20px 10px; color: var(--ink-soft); font-size: .92rem; }
+  .snake-overlay {
+    position: fixed; inset: 0; z-index: 60; background: rgba(10,6,16,.88);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+    animation: snakeOverlayIn .34s cubic-bezier(.2,.82,.25,1) both;
+    transform-origin: center;
+  }
+  .snake-overlay.snake-closing { animation: snakeOverlayOut .28s cubic-bezier(.55,.05,.7,.2) forwards; }
+  @keyframes snakeOverlayIn {
+    from { opacity: 0; transform: scale(.965); filter: blur(7px); }
+    60% { opacity: 1; transform: scale(1.012); filter: blur(0); }
+    to { opacity: 1; transform: scale(1); filter: blur(0); }
+  }
+  @keyframes snakeOverlayOut {
+    from { opacity: 1; transform: scale(1); filter: blur(0); }
+    100% { opacity: 0; transform: scale(.985); filter: blur(5px); }
+  }
+  .snake-overlay canvas { background: #100a18; border: 2px solid var(--accent); border-radius: 10px; }
+  .snake-overlay .score { color: #fff; font-family: var(--display); font-size: 1.3rem; }
+  .snake-overlay .msg { color: var(--gold); font-family: var(--display); font-size: 1.2rem; text-align: center; }
+
+  .countdown-box { display: flex; gap: 18px; justify-content: center; margin: 22px 0; flex-wrap: wrap; animation: countdownIn .6s cubic-bezier(.2,.8,.3,1); }
+  @keyframes countdownIn { from { opacity: 0; transform: translateY(14px) scale(.92); } to { opacity: 1; transform: none; } }
+  .countdown-box .unit { text-align: center; }
+  .countdown-box .num { font-family: var(--display); font-size: clamp(2.2rem, 9vw, 3.4rem); font-weight: 700; color: var(--accent); }
+  .countdown-box .num.timer-tick { animation: timerTick .34s ease; }
+  @keyframes tickPulse { 0% { transform: scale(1.16); opacity: .6; } 100% { transform: scale(1); opacity: 1; } }
+  .countdown-box .lbl { font-size: .74rem; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .05em; }
+
+  /* ===================== ВЕРСИЯ III — мягкая тема ===================== */
+  body.v3-theme {
+    --bg: #fff6ee;
+    --bg-alt: #ffece0;
+    --card: #fffaf6;
+    --ink: #4a3b34;
+    --ink-soft: #8d7669;
+    --accent: #e08a5b;
+    --accent-soft: #fbe3d2;
+    --gold: #f2b705;
+    --ok: #7fae86;
+    --ok-bg: #eaf3ea;
+    --bad: #d98b7a;
+    --bad-bg: #fbe9e4;
+    --line: #f0ddce;
+    --code-bg: #fff1e4;
+    --code-ink: #b5651d;
+  }
+
+  .v3-wash { position: fixed; inset: 0; z-index: 58; background: #fff; opacity: 0; transition: opacity 4.8s cubic-bezier(.2,.7,.25,1); pointer-events: none; }
+
+  .v3-blob-field { position: fixed; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
+  .v3-blob { position: absolute; border-radius: 50%; filter: blur(36px); opacity: .78; animation: v3Drift 10s ease-in-out infinite; will-change: transform; }
+  .v3-blob.b1 { width: 360px; height: 360px; background: #ffcf9e; top: -90px; left: -80px; animation-duration: 10s; }
+  .v3-blob.b2 { width: 330px; height: 330px; background: #ffb6c8; bottom: -90px; right: -70px; animation-duration: 11s; animation-delay: -5s; }
+  .v3-blob.b3 { width: 270px; height: 270px; background: #ffe29e; top: 38%; right: 3%; animation-duration: 8.5s; animation-delay: -2s; }
+  .v3-blob.b4 { width: 250px; height: 250px; background: #ffd0e8; top: 16%; left: 36%; animation-duration: 12s; animation-delay: -8s; }
+  .v3-blob.b5 { width: 220px; height: 220px; background: #ffc89a; bottom: 13%; left: 5%; animation-duration: 9s; animation-delay: -4s; }
+  .v3-blob.b6 { width: 190px; height: 190px; background: #ffd9b8; top: 54%; left: 20%; animation-duration: 7.5s; animation-delay: -3s; }
+  .v3-blob.b7 { width: 170px; height: 170px; background: #fbc8e6; top: 7%; right: 20%; animation-duration: 9.5s; animation-delay: -6s; }
+  @keyframes v3Drift {
+    0%, 100% { transform: translate(0,0) scale(1) rotate(0deg); }
+    25% { transform: translate(34px,-26px) scale(1.09) rotate(3deg); }
+    50% { transform: translate(-26px,30px) scale(.94) rotate(-2deg); }
+    75% { transform: translate(20px,10px) scale(1.05) rotate(2deg); }
+  }
+
+  body.v3-theme {
+    background:
+      radial-gradient(circle at 15% 20%, rgba(255,214,173,.34), transparent 34%),
+      radial-gradient(circle at 85% 72%, rgba(255,184,211,.30), transparent 34%),
+      linear-gradient(120deg, #fff6ee, #fff1e8, #fff8ef, #ffefe4);
+    background-size: 100% 100%, 100% 100%, 260% 260%;
+    animation: v3BgShift 16s ease-in-out infinite;
+  }
+  @keyframes v3BgShift { 0%,100% { background-position: 0% 0%, 100% 100%, 0% 50%; } 50% { background-position: 10% 8%, 90% 92%, 100% 50%; } }
+  body.v3-theme #app { width: 100%; max-width: 620px; min-height: calc(100vh - 48px); display: flex; align-items: center; justify-content: center; }
+  body.v3-theme #app > .v3-transition-text,
+  body.v3-theme #app > .v3-card { margin-left: auto; margin-right: auto; }
+
+  .v3-card {
+    position: relative; z-index: 2;
+    background: rgba(255,255,255,.66); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-radius: 28px; padding: 34px 28px; box-shadow: 0 24px 60px -30px rgba(120,80,50,.35);
+    max-width: 32rem; width: 100%; margin: 0 auto; animation: v2Materialize .8s cubic-bezier(.2,.8,.3,1);
+  }
+  .v3-card .q { text-align: center; font-size: clamp(1.3rem, 5vw, 1.7rem); }
+
+  .floaty { animation: v3Bob 2.6s ease-in-out infinite; }
+  @keyframes v3Bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+  .v3-transition-text {
+    position: relative; z-index: 2;
+    font-family: var(--display); font-size: 1.5rem; text-align: center; max-width: 30rem; margin: 0 auto;
+    color: var(--ink); line-height: 1.6; padding: 40px 20px;
+    opacity: 0;
+    animation: v3TextIn .9s ease 6.4s forwards, v3Float 4s ease-in-out 7.3s infinite;
+  }
+  @keyframes v3TextIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  @keyframes v3in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @keyframes v3Float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  @keyframes v3out { from { opacity: 1; } to { opacity: 0; } }
+
+  .v3-final-wrap {
+    position: fixed; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center;
+    padding: 32px; text-align: center;
+    background: linear-gradient(-45deg, #ffb37a, #ff8fa3, #ffd98a, #f7b6d2);
+    background-size: 360% 360%;
+    animation: sunset 22s ease infinite;
+  }
+  @keyframes sunset { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+  .v3-final-msg {
+    max-width: 34rem; font-family: var(--display); font-size: 1.4rem; line-height: 1.55;
+    color: #4a3b34; background: rgba(255,255,255,.72); padding: 30px 26px; border-radius: 18px;
+    box-shadow: 0 20px 50px -20px rgba(0,0,0,.35); animation: rise .8s ease;
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+/* =======================================================================
+   НАСТРОЙКИ — правь здесь
+   ======================================================================= */
+const CONFIG = {
+  participantCount: '15',      // вопрос 2: реальное число участников
+  sportsTarget: 10,            // вопрос 6: сколько уникальных верных до кода
+  gamesTarget: 5,              // вопрос 11: сколько разных игр для прохождения
+  clickerSeconds: 20,          // вопрос 8: длительность кликера
+  cookingVideoUrl: '',         // вопрос 12: ссылка на видео (пока пусто)
+  botName: '@St0rytell3rBot',  // вопрос 15
+
+  v2Code: '75144747',          // код, открывающий Версию II (вводится в любое поле, кроме ника)
+  debugCode: '69tetoteto67',   // служебный код: мгновенный доступ ко всем вопросам всех версий, для тестов
+  v2Dates: {                   // даты открытия вопросов Версии II
+    1: '2026-10-31T00:00:00',
+    2: '2026-10-31T00:00:00',
+    3: '2026-11-02T00:00:00',
+    4: '2026-11-02T00:00:00',
+    5: '2026-11-04T00:00:00',
+  },
+  birthdayStart: '2026-11-04T00:00:00', // начало 24-часового таймера вопроса II-5
+  birthdayEnd: '2026-11-05T00:00:00',
+
+  calmMusicUrl: 'audio/MyConfession.mp3', // Версия III: положи свою музыку в audio/MyConfession.mp3 рядом с HTML
+  v2ToV3SfxUrl: 'audio/verIIsfx.mp3', // Звук перехода II→III: 9-секундный файл verIIsfx.mp3
+  v2UnlockSfx: {
+    crack1: 'audio/1.mp3',
+    crack2: 'audio/2.mp3',
+    crack3: 'audio/3.mp3',
+    collapse: 'audio/4.mp3',
+    blackHum: 'audio/5.mp3',
+  },
+  reviewEndpoint: '',          // legacy: внешний webhook, если понадобится позже
+  serverEndpoint: 'https://birthday-quest-api.kreazot316.workers.dev/api/player', // вставь сюда URL своего Cloudflare Worker
+
+  // ЗАГЛУШКА до серверной версии: сколько друзей дошли до каждого вопроса Версии II.
+  // Когда появится бэкенд с реальными данными — reachedCount() ниже переключишь на запрос к нему.
+  v2ReachedStats: { 1: 15, 2: 11, 3: 9, 4: 7, 5: 5 },
+
+  friendMessages: {
+    // ключ — ник друга в нижнем регистре без пробелов, значение — твоё персональное сообщение
+    // '__default__' — сообщение для всех, кому не задано персональное
+    __default__: 'Спасибо, что дошёл(-шла) до конца. Ты значишь для меня очень много — с днём рождения меня, и спасибо, что рядом! 💜',
+  },
+};
+
+/* =======================================================================
+   ВРЕМЯ
+   Статический html-файл не может иметь по-настоящему доверенное серверное
+   время — это best-effort синхронизация с публичным time-API с откатом на
+   локальные часы устройства, если запрос не прошёл (нет сети/офлайн/блок).
+   ======================================================================= */
+let TIME_OFFSET = 0; // serverTime - Date.now()
+
+async function syncTime() {
+  const endpoints = [
+    'https://worldtimeapi.org/api/timezone/Etc/UTC',
+    'https://timeapi.io/api/Time/current/zone?timeZone=UTC',
+  ];
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, { cache: 'no-store' });
+      const data = await res.json();
+      const iso = data.utc_datetime || data.dateTime || data.currentDateTime;
+      const server = new Date(iso).getTime();
+      if (!isNaN(server)) {
+        TIME_OFFSET = server - Date.now();
+        return;
+      }
+    } catch (e) {
+      /* пробуем следующий источник */
+    }
+  }
+  TIME_OFFSET = 0; // не удалось — считаем по локальным часам
+}
+
+function now() {
+  return new Date(Date.now() + TIME_OFFSET);
+}
+
+syncTime();
+setInterval(syncTime, 5 * 60 * 1000);
+
+/* =======================================================================
+   ХРАНЕНИЕ ПРОГРЕССА
+   ======================================================================= */
+const STORE_PREFIX = 'quest_v1_';
+
+function storeKey(nick) {
+  return STORE_PREFIX + nick.trim().toLowerCase().replace(/\s+/g, '_');
+}
+
+function makeProgressSnapshot(overrides = {}) {
+  return {
+    nick: S.nick,
+    screen: S.screen,
+    index: S.index,
+    answers: S.answers,
+    unlocked: S.unlocked,
+    v2Index: S.v2Index,
+    v2Answers: S.v2Answers,
+    v3Index: S.v3Index,
+    v3Answers: S.v3Answers,
+    timerRevealed: S.timerRevealed,
+    updatedAt: Date.now(),
+    ...overrides,
+  };
+}
+
+function applyProgress(saved) {
+  if (!saved) return false;
+  S.index = saved.index || 0;
+  S.answers = saved.answers || {};
+  S.unlocked = saved.unlocked || false;
+  S.v2Index = saved.v2Index || 0;
+  S.v2Answers = saved.v2Answers || {};
+  S.v3Index = saved.v3Index || 0;
+  S.v3Answers = saved.v3Answers || [];
+  S.timerRevealed = saved.timerRevealed || false;
+  S.screen = saved.screen || 'quiz';
+  return true;
+}
+
+function loadProgress(nick) {
+  try {
+    const raw = localStorage.getItem(storeKey(nick));
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function saveProgress() {
+  if (!S.nick) return;
+  try {
+    localStorage.setItem(storeKey(S.nick), JSON.stringify(makeProgressSnapshot()));
+  } catch (e) {
+    /* приватный режим браузера — квест всё равно работает, просто без локального сохранения */
+  }
+}
+
+function serverSyncEnabled() {
+  return Boolean(CONFIG.serverEndpoint) && !CONFIG.serverEndpoint.includes('YOUR-WORKER');
+}
+
+async function loadServerProgress(nick) {
+  if (!serverSyncEnabled()) return null;
+  try {
+    const url = CONFIG.serverEndpoint + '?nick=' + encodeURIComponent(nick);
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data && data.found ? data.player : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function syncPlayerToServer(checkpoint, overrides = {}) {
+  if (!S.nick || !serverSyncEnabled()) return false;
+  const state = makeProgressSnapshot(overrides);
+  const payload = {
+    nick: S.nick,
+    checkpoint: checkpoint || 'progress',
+    state,
+    sentAt: Date.now(),
+  };
+  try {
+    const res = await fetch(CONFIG.serverEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      cache: 'no-store',
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    if (data && data.player) {
+      try {
+        localStorage.setItem(storeKey(S.nick), JSON.stringify(data.player.state || state));
+      } catch (e) {}
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+/* =======================================================================
+   НОРМАЛИЗАЦИЯ ОТВЕТОВ
+   ======================================================================= */
+function norm(v) {
+  return (v || '').toString().trim().toLowerCase()
+    .replace(/ё/g, 'е')
+    .replace(/[.,!?;:"'`«»\-–—()]/g, '')
+    .replace(/\s+/g, ' ');
+}
+function tight(v) { return norm(v).replace(/\s+/g, ''); }
+function digits(v) { return (v || '').toString().replace(/\D/g, ''); }
+
+/* =======================================================================
+   СПИСКИ ОТВЕТОВ
+   ======================================================================= */
+const SPORTS = [
+  'шахматы', 'спортивная гимнастика', 'гимнастика', 'айкидо',
+  'стрельба из лука', 'стрельба из ружья', 'стрельба', 'футбол', 'флорбол',
+  'хоккей', 'фигурное катание', 'школьный парламент', 'парламент',
+  'школьный театр', 'театр', 'аниматор', 'теннис', 'плавание', 'брейкданс',
+  'брейк данс', 'пейнтбол', 'лазертаг', 'лазер таг', 'настольный теннис',
+  'рисование', 'программирование', 'сценическая речь', 'актерское мастерство',
+  'фотография', 'видеосъемка', 'фортепиано', 'вокал', 'химия', 'вышивка',
+];
+
+const GAMES = [
+  ['gta5', 'gtav', 'гта5', 'гтав', 'grandtheftauto5', 'grandtheftautov'],
+  ['nierautomata', 'nier', 'ниерautomata', 'ньеравтомата'],
+  ['geometrydash', 'геометридеш'],
+  ['teamfortress2', 'tf2', 'тимфортресс2'],
+  ['cyberpunk2077', 'cyberpunk', 'киберпанк2077', 'киберпанк'],
+  ['xcom2', 'икском2'],
+  ['ageofmythologyretold', 'ageofmythology', 'aom', 'aomretold'],
+  ['outerwilds', 'аутервилдс'],
+  ['omori', 'омори'],
+  ['inscryption', 'инскрипшн'],
+  ['terraria', 'террария'],
+  ['zenlesszonezero', 'zzz', 'зенлесс'],
+  ['starcraft2', 'старкрафт2', 'sc2'],
+  ['helldivers2', 'хеллдайверс2', 'хелдайверс2'],
+  ['minecraft', 'майнкрафт', 'майн'],
+  ['ddlc', 'ddlcplus', 'dokidokiliteratureclub', 'dokidokiliteratureclubplus'],
+  ['beatsaber', 'битсейбер'],
+  ['prey', 'прей'],
+  ['slimerancher2', 'слаймранчер2'],
+  ['undertale', 'андертейл'],
+  ['persona5royal', 'persona5', 'персона5'],
+];
+
+function matchGame(value) {
+  const t = tight(value);
+  if (!t) return null;
+  for (let i = 0; i < GAMES.length; i++) {
+    if (GAMES[i].includes(t)) return i;
+  }
+  return null;
+}
+
+/* =======================================================================
+   ФРАЗЫ
+   ======================================================================= */
+const SPORTS_YES = [
+  'Да, я действительно этим занимался. А может, ты знаешь ещё?',
+  'Да! А что-нибудь ещё?',
+  'Правильно. Но это далеко не всё :)',
+  'Да, было такое. Попробуешь ещё?',
+  'Верно. Есть ли ещё идеи?',
+  'Ага, и это тоже. Давай дальше?',
+];
+
+const CONFIRM_PHRASES = [
+  'Вы уверены?', 'Точно?', '100%?', 'Совсем уверены?', '2 + 2 = 5?',
+  'Серьёзно?', 'А если подумать?', 'Уверен-уверен?', 'Ну точно?',
+  'Прям совсем?', 'Без сомнений?', 'Это окончательно?', 'Честно?',
+  'А если я спрошу ещё раз?', 'Готов подписаться?', 'Не передумаешь?',
+  'Точно-точно?', 'Даже сейчас?', 'И через минуту тоже?', 'А завтра?',
+  'Ты вообще читаешь, что тут написано?', 'Проверим ещё раз?',
+  'Это твой финальный ответ?', 'Уверенность на максимуме?',
+  'А палец не устал?', 'Всё ещё да?', 'Не сомневаешься?',
+  'Печатью заверишь?', 'Под запись?', 'Вот прям да-да?',
+  'У тебя есть код?',
+  'Продолжаем?', 'Ты силён.', 'Ещё немножко?', 'Не сдаёшься?',
+  'Держишься?', 'Почти всё, обещаю.', 'Ну совсем чуть-чуть?',
+  'Последний раз, честно.', 'Ладно, вот теперь правда последний?',
+];
+const CONFIRM_TRICK = CONFIRM_PHRASES.indexOf('У тебя есть код?');
+
+const CLICK_NOISE = [
+  'Ты отвернулся ;P', 'Не отвлекайся.', 'Я всё вижу.',
+  'Ты сейчас на что-то посмотрел.', 'Не подглядывай.', 'Ещё-ещё-ещё!',
+  'Палец не болит?', 'Быстрее!', 'Я считаю каждый клик.',
+  'Кто тут у нас старается?', 'Не останавливайся.', 'Так держать!',
+  'Не моргай.', 'Я заметил.', 'Сюда смотри.', 'Клик-клик-клик.',
+  'Ты точно успеешь?', 'Ещё один!', 'Почему так медленно?', 'Шевели пальцами.',
+  'Я наблюдаю.', 'Это подозрительно.', 'Не отвлекайся на текст.',
+  'Ты что-то пропустил.', 'Продолжай!', 'Не сдавайся.', 'Скорее!',
+  'Один клик — это мало.', 'А вот ещё!', 'Вижу тебя.', 'Хорошо идёт.',
+  'Ещё!', 'Быстрее-бстрее!', 'Не останавливайся!', 'Куда смотришь?',
+  'Ты всё ещё здесь?', 'Кликни ещё.', 'Почти-почти.', 'Это было медленно.',
+  'Я считаю.', 'Не расслабляйся.', 'Давай-давай.', 'Ещё немного.',
+  'Ты справляешься.', 'Вот так.', 'Нажимай!', 'Не промахнись.',
+  'Слишком спокойно.', 'Я жду.', 'Ещё один раз.', 'Не теряй темп.',
+  'Ты можешь быстрее.', 'Продолжай кликать.', 'Хоп!', 'Оп!',
+];
+
+const STRAW_TEXTS = [
+  'не тут', 'и не здесь', 'попробуй ещё', 'я позавтракал бананом сегодня',
+  'тоже нет', 'мимо', 'почти', 'Orange', 'Banana', 'Monday', 'Computer',
+  'холодно', 'горячо', 'да ну нет', 'ты уверен, что смотришь сюда?',
+  'ищи дальше', 'а вот и нет', 'Tuesday', 'Keyboard', 'Pineapple',
+  'ну почти же', 'не сдавайся', 'а если левее?', 'или правее?',
+  'Sunday', 'Elephant', 'ничего тут нет', 'проверь ещё раз',
+  'выше', 'ниже', 'левее', 'правее', 'Wednesday', 'Thursday', 'Friday',
+  'Saturday', 'Umbrella', 'Bicycle', 'Mountain', 'River', 'ты близко',
+  'ты далеко', 'опять мимо', 'не там', 'совсем не там', 'попробуй иначе',
+  'ты справишься', 'терпение', 'почти получилось', 'ещё чуть-чуть',
+  'глаза не обманывают?', 'а тут точно ничего', 'серьёзно, не тут',
+  'холоднее', 'теплее', 'горячее', 'Notebook', 'Window', 'Garden',
+  'ты на верном пути (нет)', 'подожди', 'думаешь, тут?', 'а вот и снова нет',
+];
+
+/* =======================================================================
+   ВОПРОСЫ
+   ======================================================================= */
+const QUESTIONS = [
+  {
+    n: 1, kind: 'text',
+    text: 'Когда родился Клим?',
+    hint: 'Введи дату в формате ДД.ММ.ГГГГ.',
+    check: v => ['04112006', '4112006', '041106', '41106'].includes(digits(v)),
+    okHtml: 'Правильно! Ответ: <span class="stealth">14:00</span> 04.11.2006',
+  },
+  {
+    n: 2, kind: 'text',
+    text: 'Сколько всего человек участвует в опросе?',
+    check: v => norm(v) === norm(CONFIG.participantCount),
+    ok: () => 'Правильно! Ответ: ' + CONFIG.participantCount,
+  },
+  {
+    n: 3, kind: 'free',
+    text: 'Как давно мы знакомы?',
+    hint: 'Можно написать дату, событие, место или любой другой вариант ответа.',
+    ok: () => 'Записал :)',
+  },
+  {
+    n: 4, kind: 'text',
+    text: 'Какая любимая сеть ресторанов у Клима?',
+    check: v => ['mcdonalds', 'mcdonald', 'макдоналдс', 'макдональдс', 'мак', 'макдак', 'мкдональдс'].includes(tight(v)),
+    ok: () => 'Правильно! Ответ: McDonalds',
+    extra: 'ad',
+  },
+  {
+    n: 5, kind: 'text',
+    text: 'В какой игре в Steam у Клима больше всего часов?',
+    check: v => ['terraria', 'террария'].includes(tight(v)),
+    ok: () => 'Правильно! Ответ: Terraria',
+  },
+  {
+    n: 6, kind: 'sports',
+    text: 'Как ты думаешь, в каких спортивных секциях/кружках Клим участвовал?',
+    hint: 'Напиши один вариант, на русском.',
+  },
+  {
+    n: 7, kind: 'free',
+    text: 'Как ты думаешь, какая сейчас цель у Клима?',
+    ok: () => 'Спасибо за ответ :)',
+  },
+  {
+    n: 8, kind: 'clicker',
+    text: 'Нажми на кнопку как можно больше раз',
+  },
+  {
+    n: 9, kind: 'text',
+    text: 'Какие языки программирования знает Клим?',
+    hint: 'Можно указать один или несколько.',
+    check: v => {
+      const t = tight(v);
+      return ['python', 'пайтон', 'питон', 'scratch', 'скретч', 'java', 'джава', 'ява', 'c++', 'с++', 'cpp', 'си++'].some(l => t.includes(tight(l)));
+    },
+    okHtml: 'Правильно! Варианты ответа: PYTHON, Scratch, Java, C++',
+  },
+  {
+    n: 10, kind: 'confirm',
+    text: 'Вы уверены?',
+  },
+  {
+    n: 11, kind: 'games',
+    text: 'Какие 5 любимых игр у Клима?',
+    hint: 'Напиши по одной игре за раз.',
+  },
+  {
+    n: 12, kind: 'yesno',
+    text: 'Умеет ли Клим готовить?',
+    right: 'да',
+    extra: 'cooking',
+  },
+  {
+    n: 13, kind: 'text',
+    text: 'Какой любимый цвет у Клима?',
+    check: v => ['фиолетовый', 'фиолетовая', 'фиолет', 'purple', 'violet'].includes(tight(v)),
+    ok: () => 'Правильно! Ответ: Фиолетовый',
+  },
+  {
+    n: 14, kind: 'text',
+    text: 'Какое у Клима сейчас зрение?',
+    check: v => ['-2', 'минус2', '2', '-20', '-2.0'].includes(tight(v)),
+    ok: () => 'Правильно! Ответ: -2',
+  },
+  {
+    n: 15, kind: 'text',
+    textHtml: 'Хотелось ли тебе когда-нибудь узнать своё будущее?',
+    hintHtml: 'Какие испытания тебе уготованы? Какие радости идут тебе навстречу?<br><br>Попроси нашего нового телеграм-бота <strong>' + CONFIG.botName + '</strong>!<br>Просто напиши ему: <strong>«Предскажи мою судьбу»</strong>',
+    check: v => ['колесофортуны', 'колесо', 'фортуна', 'wheeloffortune'].includes(tight(v)),
+    ok: () => 'Похоже, гадалка не ошиблась! Ответ: Колесо Фортуны',
+    bad: () => 'Не похоже, что вы обратились по адресу.',
+  },
+  {
+    n: 16, kind: 'text',
+    text: 'Джастин Тимберлейк — ____________, 7 июля 2006 года',
+    check: v => ['sexyback', 'сексибек', 'sexy back'].includes(tight(v)),
+    ok: () => 'Правильно! Ответ: SexyBack',
+  },
+  {
+    n: 17, kind: 'text',
+    text: 'Какой у Клима любимый покемон?',
+    check: v => ['парас', 'paras'].includes(tight(v)),
+    ok: () => 'Правильно! Ответ: Парас',
+  },
+  {
+    n: 18, kind: 'haystack',
+    textHtml: '<strong>Ответ находится тут ↓</strong>',
+    check: v => tight(v) === 'sparkle',
+    ok: () => 'Правильно! Ответ: Sparkle',
+  },
+  {
+    n: 19, kind: 'yesno',
+    text: 'Ломал ли Клим когда-либо свои кости?',
+    right: 'да',
+  },
+  {
+    n: 20, kind: 'free',
+    text: 'Понравился ли тебе опрос? Напиши комментарий :)',
+    ok: () => 'Спасибо за комментарий!',
+  },
+];
+
+/* =======================================================================
+   ВЕРСИЯ II — ВОПРОСЫ
+   ======================================================================= */
+const V2_QUESTIONS = [
+  {
+    n: 1, kind: 'text',
+    text: 'Протокол',
+    hint: 'Ну эта... светяшка... она разбирается в них лучше меня.',
+    check: v => tight(v) === 'tp316',
+    ok: 'Верно! Ответ: TP-316',
+  },
+  {
+    n: 2, kind: 'text',
+    text: '1  4',
+    check: v => tight(v) === 'truegamer316',
+    ok: 'Верно! Ответ: TrueGamer316',
+  },
+  {
+    n: 3, kind: 'link',
+    text: 'Между строк',
+    linkUrl: 'https://docs.google.com/document/d/1XSGMq_UgqxJL9iZfA4tNoegyWMtPbapUyo06Di3uNN4/edit?usp=sharing',
+    check: v => tight(v) === 'повод',
+    ok: 'Верно! Ответ: Повод',
+  },
+  {
+    n: 4, kind: 'text',
+    text: '316',
+    check: v => [
+      'компьютерныеигры', 'фиолетовый', 'друзья',
+      'компьютерныеигрыфиолетовыйдрузья',
+      '3компьютерныеигры1фиолетовый6друзья',
+    ].includes(tight(v)),
+    ok: 'Верно!',
+  },
+  {
+    n: 5, kind: 'countdown',
+    text: 'Ты уже знаешь, что делать',
+    check: v => ['спасибо', 'спасибо!'].includes(tight(v)),
+    ok: 'Спасибо тебе. Правда.',
+  },
+];
+
+/* =======================================================================
+   ВЕРСИЯ III — ОТКРЫТЫЕ ВОПРОСЫ
+   ======================================================================= */
+const V3_QUESTIONS = [
+  'Какая моя привычка или особенность тебе особенно нравится?',
+  'Как бы ты описал(а) меня тремя словами?',
+  'Есть ли что-то, что ты давно хотел(а) мне сказать, но никогда не говорил(а)?',
+  'Какой момент нашей дружбы ты надеешься однажды вспомнить и улыбнуться?',
+];
+
+function friendMessage(nick) {
+  const key = tight(nick);
+  return CONFIG.friendMessages[key] || CONFIG.friendMessages.__default__;
+}
+
+// Заглушка до серверной версии — см. комментарий у CONFIG.v2ReachedStats
+function reachedCount(n) {
+  return { reached: CONFIG.v2ReachedStats[n] || 0, total: Number(CONFIG.participantCount) || 0 };
+}
+
+async function sendForReview(payload) {
+  if (!CONFIG.reviewEndpoint) return;
+  try {
+    await fetch(CONFIG.reviewEndpoint, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch (e) {
+    /* необязательный внешний webhook — основное сохранение идёт через serverEndpoint */
+  }
+}
+
+/* =======================================================================
+   СОСТОЯНИЕ
+   ======================================================================= */
+const S = {
+  screen: 'intro',   // intro | quiz | final | v2intro | v2quiz | v3transition | v3quiz | v3final
+  nick: '',
+  index: 0,
+  answers: {},       // n -> { value, passed, lastCorrect, ... }
+  unlocked: false,   // код Версии II введён
+  v2Index: 0,
+  v2Answers: {},
+  v3Index: 0,
+  v3Answers: [],
+  debugAll: false,   // служебный режим: доступ ко всем вопросам, в localStorage не сохраняется
+  timerRevealed: false, // таймер II-5 стал глобальным (виден на любом экране кроме Версии III)
+};
+
+function slot(n) {
+  if (!S.answers[n]) S.answers[n] = {};
+  return S.answers[n];
+}
+
+function v2slot(n) {
+  if (!S.v2Answers[n]) S.v2Answers[n] = {};
+  return S.v2Answers[n];
+}
+
+function passedCount() {
+  return QUESTIONS.filter(q => slot(q.n).passed).length;
+}
+
+const app = document.getElementById('app');
+let snakeKeyHandler = null;
+let globalTimerInterval = null;
+
+
+/* =======================================================================
+   САУНД-ДИЗАЙН
+   Короткие UI-звуки и фон Версии II генерируются через Web Audio API.
+   Сюжетный переход I→II и музыка/переход III используют MP3 из CONFIG.
+   ======================================================================= */
+const AUDIO = {
+  ctx: null,
+  master: null,
+  ambient: null,
+  ambientPulse: null,
+  v3Music: null,
+  v3MusicPathIndex: 0,
+  v2ToV3Sfx: null,
+  v2ToV3SfxPathIndex: 0,
+  v2UnlockSfx: {},
+};
+
+function audioCtx() {
+  if (AUDIO.ctx) return AUDIO.ctx;
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return null;
+  try {
+    AUDIO.ctx = new Ctx();
+    AUDIO.master = AUDIO.ctx.createGain();
+    AUDIO.master.gain.value = 0.32;
+    AUDIO.master.connect(AUDIO.ctx.destination);
+  } catch (_) {
+    return null;
+  }
+  return AUDIO.ctx;
+}
+
+function audioResume() {
+  const ctx = audioCtx();
+  if (!ctx) return null;
+  if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+  return ctx;
+}
+
+function tone(freq, duration, opts = {}) {
+  const ctx = audioResume();
+  if (!ctx || !AUDIO.master) return;
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+  const t = ctx.currentTime;
+  const endFreq = Math.max(20, opts.toFreq || freq);
+  const volume = opts.volume ?? 0.1;
+  const attack = opts.attack ?? 0.012;
+  const release = opts.release ?? Math.min(0.22, duration * .55);
+
+  o.type = opts.type || 'sine';
+  o.frequency.setValueAtTime(Math.max(20, freq), t);
+  if (endFreq !== freq) o.frequency.exponentialRampToValueAtTime(endFreq, t + Math.max(.03, duration));
+  filter.type = 'lowpass';
+  filter.frequency.value = opts.filter || 3200;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(Math.max(0.0001, volume), t + attack);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + Math.max(attack + .02, duration - release));
+
+  o.connect(filter).connect(g).connect(AUDIO.master);
+  o.start(t);
+  o.stop(t + duration + .05);
+}
+
+function noise(duration = .12, opts = {}) {
+  const ctx = audioResume();
+  if (!ctx || !AUDIO.master) return;
+  const len = Math.max(1, Math.floor(ctx.sampleRate * duration));
+  const buffer = ctx.createBuffer(1, len, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  const src = ctx.createBufferSource();
+  const filter = ctx.createBiquadFilter();
+  const g = ctx.createGain();
+  const t = ctx.currentTime;
+  filter.type = opts.filterType || 'bandpass';
+  filter.frequency.value = opts.filter || 1800;
+  filter.Q.value = opts.q || 0.7;
+  const volume = opts.volume ?? 0.035;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(Math.max(.0001, volume), t + .008);
+  g.gain.exponentialRampToValueAtTime(.0001, t + Math.max(.012, duration - .025));
+  src.buffer = buffer;
+  src.connect(filter).connect(g).connect(AUDIO.master);
+  src.start(t);
+  src.stop(t + duration + .03);
+}
+
+const SFX = {
+  button() { tone(1450, .045, { type: 'square', volume: .024, filter: 4200, release: .03 }); },
+  correctV1() {
+    tone(560, .10, { type: 'sine', volume: .065, toFreq: 760 });
+    setTimeout(() => tone(860, .14, { type: 'sine', volume: .06, toFreq: 1180 }), 60);
+  },
+  wrongV1() {
+    tone(220, .18, { type: 'triangle', volume: .07, toFreq: 145 });
+    setTimeout(() => noise(.09, { volume: .022, filter: 900 }), 35);
+  },
+  correctV2() {
+    noise(.10, { volume: .024, filter: 3000, q: 1.1 });
+    tone(260, .16, { type: 'sawtooth', volume: .052, toFreq: 430, filter: 2200 });
+    setTimeout(() => tone(430, .20, { type: 'sawtooth', volume: .06, toFreq: 690, filter: 3200 }), 65);
+    setTimeout(() => tone(690, .28, { type: 'sine', volume: .07, toFreq: 980, filter: 4200 }), 130);
+  },
+  wrongV2() {
+    tone(115, .34, { type: 'sawtooth', volume: .052, toFreq: 78, filter: 1000 });
+    noise(.18, { volume: .016, filter: 650, q: 1.2 });
+  },
+  v2UnlockStart() {
+    // Первый маленький треск — скорее предупреждение, чем музыка.
+    noise(.075, { volume: .028, filter: 1450, q: 1.8 });
+    tone(520, .075, { type: 'square', volume: .018, toFreq: 300, filter: 1700, release: .025 });
+  },
+  crack(level = 1) {
+    if (level === 1) {
+      // Короткий сухой треск.
+      noise(.10, { volume: .042, filter: 1750, q: 2.0 });
+      tone(610, .10, { type: 'square', volume: .022, toFreq: 340, filter: 1900, release: .035 });
+      return;
+    }
+    if (level === 2) {
+      // Второй удар уже заметно громче.
+      noise(.16, { volume: .065, filter: 1250, q: 1.7 });
+      tone(360, .15, { type: 'square', volume: .035, toFreq: 170, filter: 1500, release: .05 });
+      setTimeout(() => noise(.10, { volume: .045, filter: 2500, q: 1.3 }), 70);
+      return;
+    }
+    // Третий — длинный, громкий, с ощущением разрушения материала.
+    noise(.42, { volume: .095, filter: 950, q: 1.1 });
+    tone(205, .40, { type: 'sawtooth', volume: .05, toFreq: 78, filter: 950, release: .16 });
+    setTimeout(() => noise(.26, { volume: .07, filter: 1700, q: .9 }), 120);
+    setTimeout(() => tone(118, .34, { type: 'triangle', volume: .038, toFreq: 42, filter: 650, release: .15 }), 170);
+  },
+  collapse() {
+    // Стена реально "ломается": низкий удар + шорох обломков + хвост.
+    noise(.92, { volume: .12, filter: 720, q: .6 });
+    tone(78, .88, { type: 'sawtooth', volume: .095, toFreq: 26, filter: 420, release: .48 });
+    setTimeout(() => noise(.58, { volume: .075, filter: 1450, q: .55 }), 90);
+    setTimeout(() => noise(.42, { volume: .055, filter: 3300, q: .5 }), 260);
+    setTimeout(() => tone(42, .70, { type: 'sine', volume: .048, toFreq: 22, filter: 280, release: .44 }), 120);
+  },
+  versionSwitch(toV2) {
+    if (toV2) {
+      tone(150, .55, { type: 'sine', volume: .03, toFreq: 52, filter: 900 });
+      noise(.24, { volume: .016, filter: 1600, q: .8 });
+    } else {
+      tone(470, .65, { type: 'sine', volume: .033, toFreq: 730, filter: 2600 });
+      setTimeout(() => tone(730, .42, { type: 'sine', volume: .022, toFreq: 1020, filter: 3600 }), 120);
+    }
+  },
+  v3Transition() {
+    noise(.55, { volume: .03, filter: 1100, q: .45 });
+    tone(90, 1.1, { type: 'sine', volume: .024, toFreq: 38, filter: 700, release: .65 });
+    setTimeout(() => tone(520, .7, { type: 'sine', volume: .05, toFreq: 1100, filter: 4200 }), 380);
+  },
+  apple() {
+    tone(740, .07, { type: 'square', volume: .038, toFreq: 960, filter: 3000, release: .02 });
+    setTimeout(() => tone(980, .09, { type: 'sine', volume: .043, toFreq: 1220, filter: 3600 }), 38);
+  },
+  record() {
+    tone(620, .12, { type: 'sine', volume: .05, toFreq: 900 });
+    setTimeout(() => tone(900, .14, { type: 'sine', volume: .055, toFreq: 1280 }), 90);
+    setTimeout(() => tone(1280, .22, { type: 'sine', volume: .065, toFreq: 1600 }), 185);
+  },
+  clickerDone() {
+    tone(320, .12, { type: 'triangle', volume: .04, toFreq: 240 });
+    setTimeout(() => tone(520, .18, { type: 'sine', volume: .05, toFreq: 760 }), 120);
+  }
+};
+
+function startV2Ambient() {
+  const ctx = audioResume();
+  if (!ctx || !AUDIO.master || AUDIO.ambient) return;
+  const bus = ctx.createGain();
+  bus.gain.value = 0.0001;
+  bus.connect(AUDIO.master);
+  const low = ctx.createOscillator();
+  const high = ctx.createOscillator();
+  const lf = ctx.createBiquadFilter();
+  const hg = ctx.createGain();
+  const lfo = ctx.createOscillator();
+  const lfoGain = ctx.createGain();
+  const humGain = ctx.createGain();
+  const t = ctx.currentTime;
+  low.type = 'sawtooth'; low.frequency.value = 52;
+  lf.type = 'lowpass'; lf.frequency.value = 360;
+  humGain.gain.value = 0.12;
+  high.type = 'sine'; high.frequency.value = 104;
+  hg.gain.value = 0.035;
+  lfo.type = 'sine'; lfo.frequency.value = 0.08;
+  lfoGain.gain.value = 0.03;
+  humGain.connect(lf).connect(bus);
+  hg.connect(bus);
+  lfo.connect(lfoGain).connect(humGain.gain);
+  low.connect(humGain);
+  high.connect(hg);
+  low.start(t); high.start(t); lfo.start(t);
+  bus.gain.linearRampToValueAtTime(document.hidden ? 0.0001 : 0.15, t + 1.8);
+  AUDIO.ambient = { bus, low, high, lfo };
+
+  const pulse = () => {
+    if (!AUDIO.ambient || document.hidden || !(S.screen === 'v2intro' || S.screen === 'v2quiz')) return;
+    tone(205 + Math.random() * 18, .045, { type: 'sine', volume: .011, toFreq: 185, filter: 900 });
+    AUDIO.ambientPulse = setTimeout(pulse, 3200 + Math.random() * 2600);
+  };
+  AUDIO.ambientPulse = setTimeout(pulse, 2600);
+}
+
+function stopV2Ambient() {
+  if (AUDIO.ambientPulse) { clearTimeout(AUDIO.ambientPulse); AUDIO.ambientPulse = null; }
+  if (!AUDIO.ambient) return;
+  const ctx = AUDIO.ctx;
+  const a = AUDIO.ambient;
+  try {
+    const t = ctx.currentTime;
+    a.bus.gain.cancelScheduledValues(t);
+    a.bus.gain.linearRampToValueAtTime(0.0001, t + .65);
+    [a.low, a.high, a.lfo].forEach(n => n.stop(t + .72));
+  } catch (_) {}
+  AUDIO.ambient = null;
+}
+
+function ensureV3Music() {
+  if (!CONFIG.calmMusicUrl) return null;
+  if (AUDIO.v3Music) return AUDIO.v3Music;
+  const audio = document.createElement('audio');
+  audio.loop = true;
+  audio.preload = 'auto';
+  audio.volume = 0;
+  audio.muted = false;
+  audio.src = CONFIG.calmMusicUrl;
+  audio.dataset.v3Music = '1';
+  audio.addEventListener('error', () => {
+    if (AUDIO.v3MusicPathIndex === 0 && CONFIG.calmMusicUrl.startsWith('audio/')) {
+      AUDIO.v3MusicPathIndex = 1;
+      audio.src = CONFIG.calmMusicUrl.slice(6);
+      audio.load();
+      audio.play().catch(() => {});
+    }
+  });
+  document.body.appendChild(audio);
+  AUDIO.v3Music = audio;
+  return audio;
+}
+
+function prepareV3MusicForLaunch() {
+  const audio = ensureV3Music();
+  if (!audio) return;
+  audio.volume = 0;
+  audio.currentTime = 0;
+  audio.play().catch(() => {});
+}
+
+function startV3Music(reset = false) {
+  const audio = ensureV3Music();
+  if (!audio) return;
+  if (reset) audio.currentTime = 0;
+  audio.volume = 0.72;
+  audio.play().catch(() => {});
+}
+
+function stopV3Music() {
+  if (!AUDIO.v3Music) return;
+  AUDIO.v3Music.pause();
+  AUDIO.v3Music.currentTime = 0;
+  AUDIO.v3Music.volume = 0;
+}
+
+function prepareV2ToV3Sfx() {
+  if (!CONFIG.v2ToV3SfxUrl) return null;
+  if (AUDIO.v2ToV3Sfx) return AUDIO.v2ToV3Sfx;
+  const audio = document.createElement('audio');
+  audio.preload = 'auto';
+  audio.loop = false;
+  audio.volume = 0.88;
+  audio.src = CONFIG.v2ToV3SfxUrl;
+  audio.dataset.v2ToV3Sfx = '1';
+  audio.addEventListener('error', () => {
+    if (AUDIO.v2ToV3SfxPathIndex === 0 && CONFIG.v2ToV3SfxUrl.startsWith('audio/')) {
+      AUDIO.v2ToV3SfxPathIndex = 1;
+      audio.src = CONFIG.v2ToV3SfxUrl.slice(6);
+      audio.load();
+    }
+  });
+  document.body.appendChild(audio);
+  AUDIO.v2ToV3Sfx = audio;
+  return audio;
+}
+
+function playV2ToV3Sfx() {
+  const audio = prepareV2ToV3Sfx();
+  if (!audio) return;
+  try {
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+  } catch (_) {}
+}
+
+function stopV2ToV3Sfx() {
+  if (!AUDIO.v2ToV3Sfx) return;
+  try { AUDIO.v2ToV3Sfx.pause(); AUDIO.v2ToV3Sfx.currentTime = 0; } catch (_) {}
+}
+
+function prepareV2UnlockSfx(key) {
+  const url = CONFIG.v2UnlockSfx && CONFIG.v2UnlockSfx[key];
+  if (!url) return null;
+  if (AUDIO.v2UnlockSfx[key]) return AUDIO.v2UnlockSfx[key];
+  const audio = document.createElement('audio');
+  audio.preload = 'auto';
+  audio.loop = false;
+  audio.volume = 0.9;
+  audio.src = url;
+  audio.dataset.v2UnlockSfx = key;
+  audio.addEventListener('error', () => {
+    if (url.startsWith('audio/')) {
+      audio.src = url.slice(6);
+      audio.load();
+    }
+  });
+  document.body.appendChild(audio);
+  AUDIO.v2UnlockSfx[key] = audio;
+  return audio;
+}
+
+function playV2UnlockSfx(key) {
+  const audio = prepareV2UnlockSfx(key);
+  if (!audio) return;
+  try {
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+  } catch (_) {}
+}
+
+function stopV2UnlockSfx() {
+  Object.values(AUDIO.v2UnlockSfx).forEach((audio) => {
+    try { audio.pause(); audio.currentTime = 0; } catch (_) {}
+  });
+}
+
+document.addEventListener('visibilitychange', () => {
+  const ctx = AUDIO.ctx;
+  if (!ctx || !AUDIO.ambient) return;
+  const t = ctx.currentTime;
+  try {
+    AUDIO.ambient.bus.gain.cancelScheduledValues(t);
+    if (document.hidden) {
+      AUDIO.ambient.bus.gain.linearRampToValueAtTime(0.0001, t + 0.12);
+    } else if (S.screen === 'v2intro' || S.screen === 'v2quiz') {
+      AUDIO.ambient.bus.gain.linearRampToValueAtTime(0.15, t + 0.7);
+      if (!AUDIO.ambientPulse) {
+        const pulse = () => {
+          if (!AUDIO.ambient || document.hidden || !(S.screen === 'v2intro' || S.screen === 'v2quiz')) return;
+          tone(205 + Math.random() * 18, .045, { type: 'sine', volume: .008, toFreq: 185, filter: 900 });
+          AUDIO.ambientPulse = setTimeout(pulse, 3200 + Math.random() * 2600);
+        };
+        AUDIO.ambientPulse = setTimeout(pulse, 1200);
+      }
+    }
+  } catch (_) {}
+});
+
+window.addEventListener('pagehide', () => {
+  stopV2Ambient();
+  stopV3Music();
+  stopV2ToV3Sfx();
+  stopV2UnlockSfx();
+});
+
+document.addEventListener('click', (e) => {
+  const b = e.target.closest && e.target.closest('button');
+  if (b && !b.disabled && !b.classList.contains('debug-fab') && !b.classList.contains('version-toggle')) SFX.button();
+});
+
+/* =======================================================================
+   РЕНДЕР
+   ======================================================================= */
+function render() {
+  saveProgress();
+  if (snakeKeyHandler) { document.removeEventListener('keydown', snakeKeyHandler); snakeKeyHandler = null; }
+  if (globalTimerInterval) { clearInterval(globalTimerInterval); globalTimerInterval = null; }
+  app.innerHTML = '';
+  document.body.classList.toggle('v2-theme', S.screen === 'v2intro' || S.screen === 'v2quiz');
+  document.body.classList.toggle('v3-theme', S.screen === 'v3transition' || S.screen === 'v3quiz' || S.screen === 'v3final');
+  if ((S.screen === 'v2intro' || S.screen === 'v2quiz') && !document.body.classList.contains('v2-reveal-seq')) startV2Ambient();
+  else stopV2Ambient();
+  if (S.screen === 'v3transition') startV3Music();
+  else if (S.screen === 'v3quiz' || S.screen === 'v3final') startV3Music();
+  else stopV3Music();
+  document.querySelectorAll('.version-toggle, .hud-ticker, .hud-telemetry, .hud-wave, .debug-fab, .debug-panel, .global-timer, .v3-blob-field').forEach(n => n.remove());
+  if (S.screen === 'intro') { renderIntro(); return; }
+  if (S.screen === 'final') { renderFinal(); mountVersionToggle(); mountDebugPanel(); mountGlobalTimer(); return; }
+  if (S.screen === 'v2intro') { renderV2Intro(); mountVersionToggle(); mountHudChrome(); mountDebugPanel(); mountGlobalTimer(); return; }
+  if (S.screen === 'v2quiz') { renderV2Question(); mountVersionToggle(); mountHudChrome(); mountDebugPanel(); mountGlobalTimer(); return; }
+  if (S.screen === 'v3transition') { renderV3Transition(); mountDebugPanel(); mountV3Decor(); return; }
+  if (S.screen === 'v3quiz') { renderV3Question(); mountDebugPanel(); mountV3Decor(); return; }
+  if (S.screen === 'v3final') { renderV3Final(); mountDebugPanel(); mountV3Decor(); return; }
+  renderQuestion();
+  mountVersionToggle();
+  mountDebugPanel();
+  mountGlobalTimer();
+}
+
+/* =======================================================================
+   ОТКРЫТИЕ ВЕРСИИ II
+   Код можно ввести в ЛЮБОЕ поле сайта, кроме поля с ником.
+   ======================================================================= */
+document.addEventListener('input', (e) => {
+  const t = e.target;
+  if (!t || (t.tagName !== 'INPUT' && t.tagName !== 'TEXTAREA')) return;
+  if (t.dataset && t.dataset.nickField) return;
+  const v = t.value.trim();
+  if (v === CONFIG.debugCode) {
+    activateDebugMode();
+    return;
+  }
+  if (!S.unlocked && v === CONFIG.v2Code) {
+    triggerV2Unlock();
+  }
+});
+
+function activateDebugMode() {
+  const wasUnlocked = S.unlocked;
+  S.unlocked = true;
+  S.debugAll = true;
+  saveProgress();
+  if (!wasUnlocked) render();
+  else { mountVersionToggle(); mountHudChrome(); mountDebugPanel(); }
+}
+
+function triggerV2Unlock() {
+  if (S.unlocked) return;
+  S.unlocked = true;
+  saveProgress();
+
+  const crackLayer = el('div', 'crack-overlay');
+  document.body.appendChild(crackLayer);
+
+  const flash = el('div', 'flash-overlay');
+  flash.style.background = '#000';
+  flash.style.opacity = '0';
+  document.body.appendChild(flash);
+
+  const allTimers = [];
+
+  function addCracks(count, spread, duration, delayStep = 0) {
+    const baseAngles = [6, -18, 34, -46, 71, -63, 108, 152, -12, 89, 24, -78, 136, -35, 58, -106, 166, -2, 47, -58];
+    for (let i = 0; i < count; i++) {
+      allTimers.push(setTimeout(() => {
+        const line = el('div', 'crack-line');
+        const angle = baseAngles[i % baseAngles.length] + (Math.random() * spread * 2 - spread);
+        line.style.transform = 'rotate(' + angle.toFixed(1) + 'deg)';
+        line.style.top = (12 + Math.random() * 76) + '%';
+        line.style.left = (5 + Math.random() * 70) + '%';
+        line.style.animationDuration = duration + 'ms';
+        crackLayer.appendChild(line);
+      }, delayStep * i));
+    }
+  }
+
+  function burst(className, at, crackCount, spread, crackDuration, extraClass = '') {
+    allTimers.push(setTimeout(() => {
+      document.body.classList.add(className);
+      if (extraClass) document.body.classList.add(extraClass);
+      addCracks(crackCount, spread, crackDuration, className === 'v2-shake-large' ? 32 : 48);
+      allTimers.push(setTimeout(() => {
+        document.body.classList.remove(className);
+        if (extraClass) document.body.classList.remove(extraClass);
+      }, className === 'v2-shake-large' ? 1380 : className === 'v2-shake-medium' ? 780 : 520));
+    }, at));
+  }
+
+  // Этап 1: лёгкие трещины + 1.mp3.
+  burst('v2-shake-small', 0, 4, 4, 280);
+  allTimers.push(setTimeout(() => playV2UnlockSfx('crack1'), 180));
+
+  // Этап 2: уже серьёзно + 2.mp3.
+  burst('v2-shake-medium', 1450, 8, 9, 360);
+  allTimers.push(setTimeout(() => playV2UnlockSfx('crack2'), 1580));
+
+  // Этап 3: большой выброс — много трещин, сильная тряска, глитч и 3.mp3.
+  burst('v2-shake-large', 3150, 20, 28, 520, 'v2-catastrophe');
+  allTimers.push(setTimeout(() => playV2UnlockSfx('crack3'), 3200));
+  allTimers.push(setTimeout(() => addCracks(12, 42, 460, 28), 3450));
+  allTimers.push(setTimeout(() => { document.body.classList.add('epic-shake'); }, 3650));
+  allTimers.push(setTimeout(() => { document.body.classList.remove('epic-shake'); }, 4520));
+
+  // Этап 4: интерфейс первой версии медленно срывается вниз целыми элементами.
+  allTimers.push(setTimeout(() => {
+    // Финальный коллапс + 4.mp3.
+    playV2UnlockSfx('collapse');
+    crackLayer.style.transition = 'opacity .95s ease';
+    crackLayer.style.opacity = '1';
+
+    const fallLayer = el('div', 'v1-fall-layer');
+    document.body.appendChild(fallLayer);
+
+    const originals = Array.from(app.children);
+    const falling = [];
+
+    originals.forEach((original, i) => {
+      const rect = original.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+
+      const copy = original.cloneNode(true);
+      copy.classList.add('v1-falling-copy');
+      copy.removeAttribute('id');
+      copy.style.position = 'fixed';
+      copy.style.left = rect.left + 'px';
+      copy.style.top = rect.top + 'px';
+      copy.style.width = rect.width + 'px';
+      copy.style.height = rect.height + 'px';
+      copy.style.margin = '0';
+      copy.style.boxSizing = 'border-box';
+      copy.style.zIndex = String(3 + i);
+
+      // Физика падения: каждому элементу задаём собственную горизонтальную скорость,
+      // начальную скорость вверх и постоянное ускорение вниз. Никаких промежуточных
+      // keyframe-точек — движение рассчитывается непрерывно каждый кадр.
+      const dir = Math.random() < 0.5 ? -1 : 1;
+      const vx = dir * (85 + Math.random() * 135); // медленно уходим влево/вправо
+      const vy0 = -(720 + Math.random() * 230);       // стартовый импульс вверх
+      const gravity = 1550 + Math.random() * 350;    // постоянное ускорение вниз
+      const delay = i * 45 + Math.random() * 90;
+      const rotation = (Math.random() * 2 - 1) * 9;
+
+      copy.style.transform = 'translate3d(0,0,0) rotate(0deg) scale(1)';
+      copy.style.filter = 'blur(0) brightness(1)';
+      fallLayer.appendChild(copy);
+      falling.push({ copy, rect, vx, vy0, gravity, delay, rotation, startX: rect.left, startY: rect.top, started: false, startTime: 0 });
+      original.style.visibility = 'hidden';
+    });
+
+    // Запускаем непрерывную физическую траекторию.
+    const fallStartedAt = performance.now();
+    const animateFalls = (nowTime) => {
+      let active = false;
+      falling.forEach((item) => {
+        const elapsedMs = nowTime - fallStartedAt - item.delay;
+        if (elapsedMs < 0) {
+          active = true;
+          return;
+        }
+        if (!item.started) {
+          item.started = true;
+          item.startTime = nowTime;
+        }
+
+        const t = (nowTime - item.startTime) / 1000;
+        // x = v*t
+        // y = v0*t + 1/2*g*t^2
+        const x = item.vx * t;
+        const y = item.vy0 * t + 0.5 * item.gravity * t * t;
+        const rotation = item.rotation * Math.min(1, t / 1.5) + (item.vx < 0 ? -1 : 1) * 2.5 * t;
+
+        item.copy.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0) rotate(${rotation.toFixed(2)}deg) scale(${(1 - Math.min(.1, t * .025)).toFixed(3)})`;
+        item.copy.style.filter = `blur(${Math.min(3, t * 0.9).toFixed(2)}px) brightness(${Math.max(.68, 1 - t * .14).toFixed(3)})`;
+
+        const stillVisible = item.startY + y < window.innerHeight + 500;
+        if (stillVisible) active = true;
+      });
+
+      if (active) requestAnimationFrame(animateFalls);
+    };
+
+    requestAnimationFrame(animateFalls);
+
+    // Пока интерфейс падает, экран постепенно уходит в чёрный.
+    allTimers.push(setTimeout(() => {
+      flash.style.transition = 'opacity 2.8s cubic-bezier(.55,0,.22,1)';
+      flash.style.opacity = '1';
+    }, 1450));
+
+    allTimers.push(setTimeout(() => {
+      fallLayer.remove();
+      originals.forEach((p) => { p.style.visibility = ''; });
+    }, 4200));
+  }, 5150));
+
+  // Только после полного затемнения загружаем тему/DOM Версии II.
+  // Чёрная заливка уже должна полностью закрыть старый интерфейс.
+  allTimers.push(setTimeout(() => {
+    document.body.classList.remove('v2-shake-small', 'v2-shake-medium', 'v2-shake-large', 'v2-catastrophe', 'epic-shake');
+    document.body.classList.add('v2-theme', 'v2-reveal-seq');
+    crackLayer.remove();
+    S.screen = 'v2intro';
+    render();
+
+    // 5.mp3 звучит на полностью чёрном экране в течение своих 3 секунд.
+    playV2UnlockSfx('blackHum');
+
+    // Держим экран полностью чёрным все 3 секунды, затем открываем Версию II.
+    setTimeout(() => {
+      flash.style.transition = 'opacity 3.8s cubic-bezier(.2,.75,.25,1)';
+      flash.style.opacity = '0';
+    }, 3000);
+
+    // Держим анимацию появления дольше, чем сам fade из чёрного.
+    setTimeout(() => {
+      flash.remove();
+    }, 7200);
+
+    setTimeout(() => {
+      document.body.classList.remove('v2-reveal-seq');
+      document.body.classList.add('v2-reveal-done');
+      startV2Ambient();
+    }, 9000);
+  }, 9500));
+}
+/* ---------- Служебная панель доступа ко всем вопросам ---------- */
+function mountDebugPanel() {
+  if (!S.debugAll) return;
+  const fab = el('button', 'debug-fab', '⚙');
+  const panel = el('div', 'debug-panel');
+  panel.style.display = 'none';
+
+  function row(label, items) {
+    const r = el('div', 'debug-row');
+    r.appendChild(el('span', 'debug-label', label));
+    items.forEach(([txt, fn]) => {
+      const b = el('button', 'debug-chip', txt);
+      b.addEventListener('click', fn);
+      r.appendChild(b);
+    });
+    return r;
+  }
+
+  panel.appendChild(row('V1', QUESTIONS.map(q => [String(q.n), () => { S.screen = 'quiz'; S.index = q.n - 1; render(); }])));
+  panel.appendChild(row('V2', V2_QUESTIONS.map(q => [String(q.n), () => { S.unlocked = true; S.screen = 'v2quiz'; S.v2Index = q.n - 1; render(); }])));
+  panel.appendChild(row('V3', [
+    ['интро', () => { S.screen = 'v3transition'; render(); }],
+    ['вопросы', () => { S.screen = 'v3quiz'; S.v3Index = 0; render(); }],
+    ['финал', () => { S.screen = 'v3final'; render(); }],
+  ]));
+
+  fab.addEventListener('click', () => {
+    panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
+  });
+
+  document.body.appendChild(fab);
+  document.body.appendChild(panel);
+}
+
+/* ---------- Декоративный HUD-мусор для Версии II ---------- */
+function mountHudChrome() {
+  if (!document.body.classList.contains('v2-theme')) return;
+  if (document.querySelector('.hud-ticker')) return;
+
+  const tickerText = '// NODE 0x3F2A19 SYNC OK · CHANNEL Δ7 STABLE · AWAITING INPUT · PROTOCOL LAYER 2 · TRACE 0000-316 · SIGNAL NOMINAL · DO NOT DISCONNECT · ';
+  const ticker = el('div', 'hud-ticker');
+  ticker.appendChild(el('span', null, tickerText.repeat(3)));
+  document.body.appendChild(ticker);
+
+  const tel = el('div', 'hud-telemetry');
+  document.body.appendChild(tel);
+
+  function refreshTelemetry() {
+    if (!document.body.contains(tel) || !document.body.classList.contains('v2-theme')) return;
+    const hex = () => Math.floor(Math.random() * 65536).toString(16).toUpperCase().padStart(4, '0');
+    tel.innerHTML =
+      'NODE <b>0x' + hex() + '</b><br>' +
+      'SIGNAL <b>' + (70 + Math.floor(Math.random() * 29)) + '%</b><br>' +
+      'SYNC <b>OK</b>';
+    setTimeout(refreshTelemetry, 2200 + Math.random() * 1500);
+  }
+  refreshTelemetry();
+
+  const wave = el('div', 'hud-wave');
+  const bars = el('div', 'bars');
+  for (let i = 0; i < 11; i++) {
+    const b = document.createElement('span');
+    b.style.animationDelay = (i * 0.09) + 's';
+    b.style.animationDuration = (0.9 + (i % 4) * 0.15) + 's';
+    bars.appendChild(b);
+  }
+  wave.appendChild(bars);
+  wave.appendChild(el('div', 'lbl', 'ANALYZING SIGNAL…'));
+  document.body.appendChild(wave);
+}
+
+function addHudCorners(card) {
+  ['hud-tl', 'hud-tr', 'hud-bl', 'hud-br'].forEach(pos => card.appendChild(el('span', 'hud-corner ' + pos)));
+}
+
+function mountV3Decor() {
+  if (document.querySelector('.v3-blob-field')) return;
+  const field = el('div', 'v3-blob-field');
+  field.appendChild(el('div', 'v3-blob b1'));
+  field.appendChild(el('div', 'v3-blob b2'));
+  field.appendChild(el('div', 'v3-blob b3'));
+  field.appendChild(el('div', 'v3-blob b4'));
+  field.appendChild(el('div', 'v3-blob b5'));
+  field.appendChild(el('div', 'v3-blob b6'));
+  field.appendChild(el('div', 'v3-blob b7'));
+  document.body.appendChild(field);
+}
+
+function formatTimerParts(ms) {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  return {
+    h: Math.floor(s / 3600),
+    m: Math.floor((s % 3600) / 60),
+    sec: s % 60,
+  };
+}
+
+function setTimerPart(node, value, key, state) {
+  const text = key === 'h' ? String(value) : String(value).padStart(2, '0');
+  if (state[key] !== value) {
+    node.textContent = text;
+    node.classList.remove('timer-tick');
+    void node.offsetWidth;
+    node.classList.add('timer-tick');
+  }
+  state[key] = value;
+}
+
+function mountGlobalTimer() {
+  if (!S.timerRevealed) return;
+  if (S.screen === 'v3transition' || S.screen === 'v3quiz' || S.screen === 'v3final') return;
+  if (document.querySelector('.global-timer')) return;
+  const start = new Date(CONFIG.birthdayStart);
+  const end = new Date(CONFIG.birthdayEnd);
+  const bar = el('div', 'global-timer');
+  const icon = el('span', null);
+  const value = el('span', null);
+  bar.appendChild(icon);
+  bar.appendChild(value);
+  document.body.appendChild(bar);
+
+  value.innerHTML = '<span class="timer-h"></span>:<span class="timer-m"></span>:<span class="timer-sec"></span>';
+  const h = value.querySelector('.timer-h');
+  const m = value.querySelector('.timer-m');
+  const sec = value.querySelector('.timer-sec');
+  const state = { h: null, m: null, sec: null, mode: null };
+
+  function tick() {
+    if (!document.body.contains(bar)) { clearInterval(globalTimerInterval); globalTimerInterval = null; return; }
+    const t = now();
+    if (t >= end) {
+      icon.textContent = '';
+      value.textContent = 'С днём рождения!';
+      value.classList.remove('timer-tick');
+      state.mode = 'done';
+      return;
+    }
+
+    const before = t < start;
+    const ms = before ? start - t : end - t;
+    const mode = before ? 'before' : 'during';
+    if (state.mode !== mode) {
+      icon.textContent = before ? '' : '🎉 ';
+      state.mode = mode;
+      state.h = state.m = state.sec = null;
+    }
+    const parts = formatTimerParts(ms);
+    setTimerPart(h, parts.h, 'h', state);
+    setTimerPart(m, parts.m, 'm', state);
+    setTimerPart(sec, parts.sec, 'sec', state);
+  }
+  tick();
+  globalTimerInterval = setInterval(tick, 1000);
+}
+function mountVersionToggle() {
+  if (!S.unlocked) return;
+  if (S.screen === 'v3transition' || S.screen === 'v3quiz' || S.screen === 'v3final') return;
+  const btn = el('button', 'version-toggle',
+    S.screen === 'v2intro' || S.screen === 'v2quiz' ? 'Версия I' : 'Версия II');
+  btn.addEventListener('click', () => {
+    if (document.body.classList.contains('version-switching') || document.body.classList.contains('version-switch-in')) return;
+
+    const goingToV2 = !(S.screen === 'v2intro' || S.screen === 'v2quiz');
+    SFX.versionSwitch(goingToV2);
+    const overlay = el('div', 'version-switch-overlay');
+    document.body.appendChild(overlay);
+    // Цвет центра затемнения плавно соответствует целевой версии.
+    overlay.style.setProperty('--switch-center', goingToV2 ? 'rgba(126,82,166,.92)' : 'rgba(222,216,228,.94)');
+    document.body.classList.add('version-switching');
+    btn.disabled = true;
+
+    // Сначала красиво «схлопываем» текущую версию, и только после этого
+    // меняем DOM. Поэтому переключение кнопкой не пересекается с сюжетными заставками.
+    setTimeout(() => {
+      S.screen = goingToV2 ? 'v2quiz' : 'quiz';
+      if (goingToV2 && (S.v2Index == null || S.v2Index < 0)) S.v2Index = 0;
+      render();
+      document.body.classList.remove('version-switching');
+      document.body.classList.add('version-switch-in');
+
+      setTimeout(() => {
+        document.body.classList.remove('version-switch-in');
+        overlay.remove();
+      }, 1150);
+    }, 760);
+  });
+  document.body.appendChild(btn);
+}
+
+function el(tag, cls, html) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (html !== undefined) e.innerHTML = html;
+  return e;
+}
+
+/* ---------- Вступление ---------- */
+function renderIntro() {
+  const card = el('div', 'card');
+  card.appendChild(el('h1', null, 'Привет!'));
+  card.appendChild(el('p', 'lead', 'Представляю тебе небольшой интерактивный опросик в честь моего 20-летия.'));
+  card.appendChild(el('p', 'lead', 'Надеюсь, тебе понравится!'));
+
+  const label = el('label', 'field');
+  label.appendChild(el('span', 'hint', 'Как тебя записать? (ник)'));
+  const input = el('input');
+  input.type = 'text';
+  input.placeholder = 'Твой ник';
+  input.style.marginTop = '8px';
+  input.dataset.nickField = '1';
+  label.appendChild(input);
+  card.appendChild(label);
+
+  const note = el('p', 'hint');
+  card.appendChild(note);
+
+  const btn = el('button', 'primary wide', 'Начать');
+  btn.style.marginTop = '18px';
+  btn.disabled = true;
+  card.appendChild(btn);
+
+  input.addEventListener('input', () => {
+    const v = input.value.trim();
+    btn.disabled = v.length === 0;
+    const saved = v ? loadProgress(v) : null;
+    note.textContent = saved
+      ? 'С этим ником уже есть прогресс — продолжим с того же места.'
+      : 'По нику сохраняется прогресс: сможешь вернуться и продолжить.';
+  });
+
+  async function start() {
+    const v = input.value.trim();
+    if (!v || btn.disabled) return;
+    btn.disabled = true;
+    note.textContent = 'Синхронизация с сервером…';
+
+    const localSaved = loadProgress(v);
+    const serverSaved = await loadServerProgress(v);
+
+    S.nick = v;
+    if (serverSaved && serverSaved.state) {
+      // Сервер — основной источник истины при наличии записи.
+      applyProgress(serverSaved.state);
+    } else if (localSaved) {
+      // Первый запуск новой серверной версии: переносим старый localStorage на сервер.
+      applyProgress(localSaved);
+      await syncPlayerToServer('migration');
+    } else {
+      S.index = 0;
+      S.answers = {};
+      S.unlocked = false;
+      S.v2Index = 0;
+      S.v2Answers = {};
+      S.v3Index = 0;
+      S.v3Answers = [];
+      S.timerRevealed = false;
+      S.screen = 'quiz';
+      saveProgress();
+      await syncPlayerToServer('created');
+    }
+
+    render();
+  }
+
+  btn.addEventListener('click', start);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') start(); });
+
+  app.appendChild(card);
+  input.focus();
+}
+
+/* ---------- Вопрос ---------- */
+function renderQuestion() {
+  const q = QUESTIONS[S.index];
+
+  const bar = el('div', 'topbar');
+  bar.appendChild(el('span', null, 'Вопрос <strong>' + q.n + '</strong> из ' + QUESTIONS.length));
+  bar.appendChild(el('span', null, S.nick));
+  app.appendChild(bar);
+
+  const track = el('div', 'track');
+  const fill = el('div');
+  fill.style.width = ((S.index + 1) / QUESTIONS.length * 100) + '%';
+  track.appendChild(fill);
+  app.appendChild(track);
+
+  const card = el('div', 'card');
+  card.appendChild(el('p', 'q', q.textHtml || q.text));
+  if (q.hint || q.hintHtml) card.appendChild(el('p', 'hint', q.hintHtml || q.hint));
+
+  const body = el('div');
+  card.appendChild(body);
+  app.appendChild(card);
+
+  const builders = {
+    text: buildText, free: buildText, yesno: buildYesNo,
+    sports: buildSports, games: buildGames,
+    clicker: buildClicker, confirm: buildConfirm, haystack: buildHaystack,
+  };
+  builders[q.kind](q, body, card);
+  if (q.n === 14) mountSnakeHotkey(q, slot(q.n));
+}
+
+function nextButton(label) {
+  const btn = el('button', 'primary', label || 'Следующий вопрос');
+  btn.addEventListener('click', async () => {
+    if (btn.disabled) return;
+    if (S.index < QUESTIONS.length - 1) {
+      S.index += 1;
+      S.screen = 'quiz';
+      render();
+      return;
+    }
+
+    // I-20: отправляем весь профиль игрока на сервер перед финальным экраном.
+    btn.disabled = true;
+    btn.textContent = 'Сохраняем…';
+    S.screen = 'final';
+    saveProgress();
+    await syncPlayerToServer('v1-complete', { screen: 'final' });
+    render();
+  });
+  return btn;
+}
+
+function verdict(kind, html) {
+  return el('p', 'verdict ' + kind, html);
+}
+
+/* ---------- Текстовые и свободные вопросы ---------- */
+function buildText(q, body, card) {
+  const free = q.kind === 'free';
+  const st = slot(q.n);
+
+  const label = el('label', 'field');
+  const input = el(free ? 'textarea' : 'input');
+  if (!free) input.type = 'text';
+  input.placeholder = free ? 'Пиши что угодно…' : 'Твой ответ…';
+  input.value = st.value || '';
+  label.appendChild(input);
+  body.appendChild(label);
+
+  const row = el('div', 'row');
+  const answerBtn = el('button', 'ghost', 'Ответить');
+  row.appendChild(answerBtn);
+  body.appendChild(row);
+
+  const out = el('div');
+  body.appendChild(out);
+
+  if (q.extra === 'ad' && st.adUnlocked) mountAd(card, st);
+
+  function showVerdict() {
+    out.innerHTML = '';
+    if (st.lastCorrect === undefined) return;
+    if (st.lastCorrect) {
+      const html = q.okHtml || (q.ok ? q.ok() : 'Правильно!');
+      out.appendChild(verdict(free ? 'neutral' : 'ok', html));
+    } else {
+      out.appendChild(verdict('bad', q.bad ? q.bad() : 'Неправильно!'));
+    }
+    if (st.codeShown) out.appendChild(el('div', 'codebox', st.codeShown));
+  }
+
+  function submit() {
+    const v = input.value;
+    st.value = v;
+    if (free) {
+      if (!v.trim()) return;
+      st.lastCorrect = true;
+      st.passed = true;
+      SFX.correctV1();
+    } else {
+      const correct = !!q.check(v);
+      st.lastCorrect = correct;
+      if (correct) { st.passed = true; SFX.correctV1(); }
+      else SFX.wrongV1();
+    }
+    if (q.extra === 'ad' && !st.adUnlocked) {
+      st.adUnlocked = true;
+      mountAd(card, st);
+    }
+    if (!row.contains(nextBtn)) row.appendChild(nextBtn);
+    showVerdict();
+    saveProgress();
+  }
+
+  const nextBtn = nextButton();
+  answerBtn.addEventListener('click', submit);
+  if (!free) input.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+
+  if (st.lastCorrect !== undefined) { row.appendChild(nextBtn); showVerdict(); }
+}
+
+/* ---------- Фейковая реклама (вопрос 4) ---------- */
+function mountAd(card, st) {
+  if (card.querySelector('.ad')) return;
+  const ad = el('div', 'ad', 'M<span>McDonalds</span>I\'m lovin\' it!');
+  ad.innerHTML = '<span>McDonalds</span>I\'m lovin\' it!';
+  ad.addEventListener('click', () => {
+    st.codeShown = 'bigmak = 3 + 2 * 2';
+    saveProgress();
+    render();
+  });
+  card.appendChild(ad);
+}
+
+/* ---------- Да / Нет ---------- */
+function buildYesNo(q, body) {
+  const st = slot(q.n);
+  const row = el('div', 'row');
+  const out = el('div');
+
+  ['да', 'нет'].forEach(opt => {
+    const b = el('button', st.value === opt ? 'primary' : 'ghost', opt === 'да' ? 'Да' : 'Нет');
+    b.addEventListener('click', () => {
+      st.value = opt;
+      st.lastCorrect = opt === q.right;
+      if (st.lastCorrect) { st.passed = true; SFX.correctV1(); }
+      else SFX.wrongV1();
+      render();
+    });
+    row.appendChild(b);
+  });
+  body.appendChild(row);
+  body.appendChild(out);
+
+  if (st.value) {
+    if (st.lastCorrect) {
+      out.appendChild(verdict('ok', 'Правильно!'));
+    } else {
+      out.appendChild(verdict('bad', q.extra === 'cooking' ? 'А вот и не правда, умею!' : 'Неправильно!'));
+      if (q.extra === 'cooking') {
+        const p = el('p', 'hint');
+        if (CONFIG.cookingVideoUrl) {
+          p.innerHTML = '<a href="' + CONFIG.cookingVideoUrl + '" target="_blank" rel="noopener">Смотри сам →</a>';
+        } else {
+          p.textContent = '[тут будет ссылка на видео]';
+        }
+        out.appendChild(p);
+      }
+    }
+    const r2 = el('div', 'row');
+    r2.appendChild(nextButton());
+    body.appendChild(r2);
+  }
+}
+
+/* ---------- Вопрос 6: секции ---------- */
+function buildSports(q, body) {
+  const st = slot(q.n);
+  if (!st.found) st.found = [];
+  if (!st.log) st.log = [];
+
+  const row = el('div', 'row');
+  const input = el('input');
+  input.type = 'text';
+  input.placeholder = 'Секция или кружок…';
+  input.style.flex = '1 1 200px';
+  const btn = el('button', 'ghost', 'Угадать');
+  row.appendChild(input);
+  row.appendChild(btn);
+  body.appendChild(row);
+
+  const out = el('div');
+  body.appendChild(out);
+  const chips = el('div', 'guesses');
+  body.appendChild(chips);
+  const nav = el('div', 'row');
+  nav.appendChild(nextButton());
+  body.appendChild(nav);
+
+  function paint() {
+    out.innerHTML = '';
+    if (st.lastMsg) {
+      const v = verdict(st.lastOk ? 'ok' : 'bad', st.lastMsg);
+      v.style.cursor = 'help';
+      v.addEventListener('mouseenter', () => {
+        v.innerHTML = st.found.length + '/10';
+      });
+      v.addEventListener('mouseleave', () => {
+        v.innerHTML = st.lastMsg;
+      });
+      out.appendChild(v);
+    }
+    if (st.found.length >= CONFIG.sportsTarget) {
+      out.appendChild(verdict('ok', 'Ого. Похоже, ты знаешь обо мне довольно много.'));
+      out.appendChild(el('div', 'codebox', 'diversity = bigmak ** 2 - 5'));
+    }
+    chips.innerHTML = '';
+    st.log.slice(-12).forEach(g => {
+      chips.appendChild(el('span', 'chip ' + (g.ok ? 'ok' : 'bad'), g.text));
+    });
+  }
+
+  function guess() {
+    const v = input.value.trim();
+    if (!v) return;
+    const n = norm(v);
+    const isRight = SPORTS.includes(n);
+    if (isRight && !st.found.includes(n)) {
+      st.found.push(n);
+      st.passed = true;
+      st.lastOk = true;
+      SFX.correctV1();
+      st.lastMsg = st.found.length >= CONFIG.sportsTarget
+        ? 'Верно!'
+        : SPORTS_YES[(st.found.length - 1) % SPORTS_YES.length];
+    } else if (isRight) {
+      st.lastOk = true;
+      st.lastMsg = 'Это ты уже называл :)';
+    } else {
+      st.lastOk = false;
+      st.lastMsg = 'Нет, не угадал.';
+      SFX.wrongV1();
+    }
+    st.log.push({ text: v, ok: isRight });
+    input.value = '';
+    saveProgress();
+    paint();
+    input.focus();
+  }
+
+  btn.addEventListener('click', guess);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') guess(); });
+  paint();
+}
+
+/* ---------- Вопрос 11: игры ---------- */
+function buildGames(q, body) {
+  const st = slot(q.n);
+  if (!st.found) st.found = [];
+  if (!st.log) st.log = [];
+
+  const row = el('div', 'row');
+  const input = el('input');
+  input.type = 'text';
+  input.placeholder = 'Название игры…';
+  input.style.flex = '1 1 200px';
+  const btn = el('button', 'ghost', 'Ответить');
+  row.appendChild(input);
+  row.appendChild(btn);
+  body.appendChild(row);
+
+  const counter = el('p', 'counter');
+  body.appendChild(counter);
+  const out = el('div');
+  body.appendChild(out);
+  const chips = el('div', 'guesses');
+  body.appendChild(chips);
+  const nav = el('div', 'row');
+  body.appendChild(nav);
+
+  function paint() {
+    const left = Math.max(0, CONFIG.gamesTarget - st.found.length);
+    counter.textContent = st.found.length >= CONFIG.gamesTarget
+      ? 'Названо игр: ' + st.found.length
+      : 'Названо: ' + st.found.length + ' из ' + CONFIG.gamesTarget;
+    out.innerHTML = '';
+    if (st.lastMsg) out.appendChild(verdict(st.lastOk ? 'ok' : 'bad', st.lastMsg));
+    chips.innerHTML = '';
+    st.log.slice(-12).forEach(g => {
+      chips.appendChild(el('span', 'chip ' + (g.ok ? 'ok' : 'bad'), g.text));
+    });
+    nav.innerHTML = '';
+    if (st.passed) {
+      nav.appendChild(nextButton());
+    } else {
+      const locked = el('p', 'hint', 'Осталось назвать ещё ' + left + ', чтобы пройти дальше.');
+      nav.appendChild(locked);
+    }
+  }
+
+  function guess() {
+    const v = input.value.trim();
+    if (!v) return;
+    const idx = matchGame(v);
+    if (idx !== null && !st.found.includes(idx)) {
+      st.found.push(idx);
+      SFX.correctV1();
+      const left = CONFIG.gamesTarget - st.found.length;
+      if (st.found.length < CONFIG.gamesTarget) {
+        st.lastMsg = 'Правильно! Назови ещё ' + left;
+      } else if (st.found.length === CONFIG.gamesTarget) {
+        st.lastMsg = 'Правильно! Это уже пять :)';
+        st.passed = true;
+      } else {
+        st.lastMsg = 'Ещё одна? Круто!';
+      }
+      st.lastOk = true;
+    } else if (idx !== null) {
+      st.lastOk = true;
+      st.lastMsg = 'Эту ты уже называл :)';
+    } else {
+      st.lastOk = false;
+      st.lastMsg = 'Нет, не угадал.';
+      SFX.wrongV1();
+    }
+    st.log.push({ text: v, ok: idx !== null });
+    // После первой попытки вопрос можно пропустить независимо от правильности ответа.
+    if (st.log.length === 1) st.passed = true;
+    input.value = '';
+    saveProgress();
+    paint();
+    input.focus();
+  }
+
+  btn.addEventListener('click', guess);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') guess(); });
+  paint();
+}
+
+/* ---------- Вопрос 8: кликер ---------- */
+function buildClicker(q, body) {
+  const st = slot(q.n);
+
+  const stage = el('div', 'clicker-stage');
+  const core = el('div', 'clicker-core');
+  const counterEl = el('div', 'clicks', '0');
+  const bigBtn = el('button', 'primary bigbutton', 'Жми!');
+  const timeEl = el('p', 'hint', CONFIG.clickerSeconds + ' сек');
+  core.appendChild(counterEl);
+  core.appendChild(bigBtn);
+  core.appendChild(timeEl);
+  stage.appendChild(core);
+  body.appendChild(stage);
+
+  const out = el('div');
+  body.appendChild(out);
+  const nav = el('div', 'row');
+  body.appendChild(nav);
+
+  if (st.done) {
+    core.innerHTML = '';
+    core.appendChild(el('div', 'clicks', String(st.clicks || 0)));
+    core.appendChild(el('p', 'hint', 'нажатий'));
+    out.appendChild(verdict(st.clicks > 0 ? 'ok' : 'bad',
+      st.clicks > 0 ? 'Отличный результат!' : 'Ну нажми, хоть разочек :('));
+    const replay = el('button', 'ghost', 'Сыграть ещё раз');
+    replay.addEventListener('click', () => {
+      st.done = false;
+      saveProgress();
+      render();
+    });
+    nav.appendChild(replay);
+    nav.appendChild(nextButton());
+    return;
+  }
+
+  let clicks = 0;
+  let left = CONFIG.clickerSeconds;
+  let running = false;
+  const timers = [];
+
+  const CORNER_ZONES = [
+    { top: [4, 20], left: [2, 20] },
+    { top: [4, 20], left: [78, 95] },
+    { top: [80, 95], left: [2, 20] },
+    { top: [80, 95], left: [78, 95] },
+    { top: [42, 58], left: [2, 14] },
+    { top: [42, 58], left: [84, 95] },
+  ];
+  function randIn(range) { return range[0] + Math.random() * (range[1] - range[0]); }
+
+  function spawnNoise(text, opts) {
+    const o = opts || {};
+    const n = el('div', 'noise' + (o.isCode ? ' code' : ''), text);
+    let top, left2;
+    if (o.top !== undefined) {
+      top = o.top; left2 = o.left;
+    } else {
+      const zone = CORNER_ZONES[Math.floor(Math.random() * CORNER_ZONES.length)];
+      top = randIn(zone.top);
+      left2 = randIn(zone.left);
+    }
+    n.style.top = top + '%';
+    n.style.left = Math.max(1, Math.min(62, left2)) + '%';
+    if (!o.isCode) {
+      n.style.fontSize = (0.8 + Math.random() * 0.75).toFixed(2) + 'rem';
+      n.style.transform = 'rotate(' + Math.round(-25 + Math.random() * 50) + 'deg)';
+    } else {
+      n.style.transform = 'rotate(-13deg)';
+    }
+    stage.appendChild(n);
+    timers.push(setTimeout(() => n.remove(), o.life || 1400));
+  }
+
+  function startRun() {
+    if (running) return;
+    running = true;
+
+    const tick = setInterval(() => {
+      left -= 1;
+      timeEl.textContent = left + ' сек';
+      if (left <= 0) {
+        clearInterval(tick);
+        finish();
+      }
+    }, 1000);
+    timers.push(tick);
+
+    // мусорные сообщения
+    const noiseTimer = setInterval(() => {
+      spawnNoise(CLICK_NOISE[Math.floor(Math.random() * CLICK_NOISE.length)], { life: 650 });
+    }, 650);
+    timers.push(noiseTimer);
+
+    // фрагмент кода: не первым, у края, дважды в одном месте, с разрывом 11 сек
+    const codePos = { top: 6, left: 1.5, isCode: true, life: 1000 };
+    timers.push(setTimeout(() => spawnNoise('teto = diversity // 5', codePos), 5000));
+    timers.push(setTimeout(() => spawnNoise('teto = diversity // 5', codePos), 16000));
+  }
+
+  function finish() {
+    timers.forEach(t => { clearTimeout(t); clearInterval(t); });
+    stage.querySelectorAll('.noise').forEach(n => n.remove());
+    st.done = true;
+    st.clicks = clicks;
+    st.attempts = (st.attempts || 0) + clicks;
+    if (clicks > 0) st.passed = true;
+    saveProgress();
+    render();
+  }
+
+  bigBtn.addEventListener('click', () => {
+    startRun();
+    clicks += 1;
+    counterEl.textContent = String(clicks);
+  });
+}
+
+/* ---------- Вопрос 10: "Вы уверены?" ---------- */
+function buildConfirm(q, body) {
+  const st = slot(q.n);
+  const step = st.step || 0;
+
+  const titleEl = document.querySelector('.card .q');
+  titleEl.textContent = CONFIRM_PHRASES[Math.min(step, CONFIRM_PHRASES.length - 1)];
+
+  const out = el('div');
+  const row = el('div', 'row');
+  body.appendChild(row);
+  body.appendChild(out);
+
+  // провал — показываем сообщение и кнопку перезапуска
+  if (st.failed) {
+    out.appendChild(verdict('bad', st.failMsg));
+    if (st.codeShown) out.appendChild(el('div', 'codebox', st.codeShown));
+    const b = el('button', 'ghost', 'Начать заново');
+    b.addEventListener('click', () => {
+      st.failed = false; st.failMsg = ''; st.step = 0;
+      render();
+    });
+    row.appendChild(b);
+    if (st.passed) row.appendChild(nextButton());
+    return;
+  }
+
+  // пройдено до конца
+  if (step >= CONFIRM_PHRASES.length) {
+    titleEl.textContent = 'Ты действительно уверен.';
+    st.passed = true;
+    saveProgress();
+    const replay = el('button', 'ghost', 'Прокликать ещё раз');
+    replay.addEventListener('click', () => {
+      st.step = 0;
+      render();
+    });
+    row.appendChild(replay);
+    row.appendChild(nextButton());
+    return;
+  }
+
+  const counter = el('p', 'counter', 'Шаг ' + (step + 1) + ' из ' + CONFIRM_PHRASES.length);
+
+  const yes = el('button', 'primary', 'Да');
+  yes.addEventListener('click', () => {
+    st.step = step + 1;
+    render();
+  });
+  const no = el('button', 'ghost', 'Нет');
+  no.addEventListener('click', () => {
+    st.failed = true;
+    if (step === CONFIRM_TRICK) {
+      st.failMsg = 'Ну раз нет…';
+      st.codeShown = 'zzz = teto * bigmak + diversity';
+    } else {
+      st.failMsg = 'Тебе не хватает решительности!';
+    }
+    render();
+  });
+  row.appendChild(yes);
+  row.appendChild(no);
+  if (st.passed) {
+    row.appendChild(nextButton());
+  }
+  body.appendChild(counter);
+}
+
+/* ---------- Вопрос 18: скрытые надписи ---------- */
+function buildHaystack(q, body) {
+  const st = slot(q.n);
+
+  const hay = el('div', 'haystack');
+
+  // размещение по сетке, чтобы надписи не накладывались друг на друга
+  const cols = 5, rows = 14;
+  const cells = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) cells.push({ r, c });
+  }
+  // перемешиваем ячейки
+  for (let i = cells.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cells[i], cells[j]] = [cells[j], cells[i]];
+  }
+
+  // Sparkle — в первой строке (рядом с текстом вопроса), sparxie — в нижней трети
+  const topCells = cells.filter(c => c.r === 0);
+  const lowCells = cells.filter(c => c.r >= 7);
+  const sparkleCell = topCells[0] || cells[0];
+  const sparxieCell = lowCells[0] || cells[cells.length - 1];
+
+  const used = new Set([sparkleCell.r + ':' + sparkleCell.c, sparxieCell.r + ':' + sparxieCell.c]);
+
+  function place(text, cell, opts) {
+    const o = opts || {};
+    const s = el('span', 'straw' + (o.correct ? ' correct-target' : ''), text);
+    const jitterR = (Math.random() - 0.5) * (100 / rows) * 0.6;
+    const jitterC = (Math.random() - 0.5) * (100 / cols) * 0.5;
+    s.style.top = Math.max(1, Math.min(97, cell.r * (100 / rows) + 1 + jitterR)) + '%';
+    s.style.left = Math.max(1, Math.min(90, cell.c * (100 / cols) + 1 + jitterC)) + '%';
+    s.style.fontSize = o.size || (0.72 + Math.random() * 0.45).toFixed(2) + 'rem';
+    s.style.color = o.color || 'rgba(47,32,56,' + (0.012 + Math.random() * 0.045).toFixed(3) + ')';
+    if (o.mono) s.style.fontFamily = 'var(--mono)';
+    if (o.rotate) s.style.transform = 'rotate(' + o.rotate + 'deg)';
+    hay.appendChild(s);
+  }
+
+  // самый скрытый уровень для ответа и кода
+  place('Sparkle', sparkleCell, { color: 'rgba(47,32,56,0.011)', size: '0.85rem', correct: true });
+  place('sparxie = hanged_man - teto', sparxieCell, { color: 'rgba(47,32,56,0.012)', size: '0.7rem', mono: true, correct: true });
+
+  let ti = 0;
+  cells.forEach(cell => {
+    const key = cell.r + ':' + cell.c;
+    if (used.has(key)) return;
+    if (ti >= STRAW_TEXTS.length) return;
+    place(STRAW_TEXTS[ti++], cell, {});
+  });
+
+  body.appendChild(hay);
+  const label = el('label', 'field');
+  const input = el('input');
+  input.type = 'text';
+  input.placeholder = 'Что ты нашёл?';
+  input.value = st.value || '';
+  label.appendChild(input);
+  body.appendChild(label);
+
+  const row = el('div', 'row');
+  const answerBtn = el('button', 'ghost', 'Ответить');
+  row.appendChild(answerBtn);
+  body.appendChild(row);
+  const out = el('div');
+  body.appendChild(out);
+
+  const nextBtn = nextButton();
+
+  function showVerdict() {
+    out.innerHTML = '';
+    if (st.lastCorrect === undefined) return;
+    out.appendChild(st.lastCorrect
+      ? verdict('ok', q.ok())
+      : verdict('bad', 'Неправильно!'));
+  }
+
+  function submit() {
+    st.value = input.value;
+    st.lastCorrect = !!q.check(input.value);
+    if (st.lastCorrect) st.passed = true;
+    if (!row.contains(nextBtn)) row.appendChild(nextBtn);
+    showVerdict();
+    saveProgress();
+  }
+
+  answerBtn.addEventListener('click', submit);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+  if (st.lastCorrect !== undefined) { row.appendChild(nextBtn); showVerdict(); }
+}
+
+/* ---------- Финальный экран ---------- */
+function renderFinal() {
+  const card = el('div', 'card');
+  card.appendChild(el('h2', null, 'Спасибо за прохождение опроса!'));
+  card.appendChild(el('p', 'lead', 'Надеюсь, тебе понравилось!'));
+
+  const score = el('p', 'lead');
+  score.innerHTML = '<strong>Ты ответил на ' + passedCount() + ' из ' + QUESTIONS.length + ' вопросов правильно!</strong>';
+  score.style.marginTop = '14px';
+  card.appendChild(score);
+
+  const secret = el('div', 'final-secret',
+    'secret = зрение**teto - (2 * zzz) / sparxie + hanged_man**bigmak - diversity + 6070\nprint(str(secret)[:8])');
+  card.appendChild(secret);
+
+  app.appendChild(card);
+
+  const line = el('div', 'switchline');
+  const back = el('button', null, 'Пройти вопросы заново');
+  back.addEventListener('click', () => { S.index = 0; S.screen = 'quiz'; render(); });
+  line.appendChild(back);
+  app.appendChild(line);
+}
+
+/* ============================================================
+   ВЕРСИЯ II
+   ============================================================ */
+function renderV2Intro() {
+  const card = el('div', 'card');
+  addHudCorners(card);
+  card.appendChild(el('h1', null, 'Версия II активирована.'));
+  card.appendChild(el('p', 'lead', 'Тебя ждут испытания.'));
+  card.appendChild(el('p', 'lead', 'Пройди их все и получи награду.'));
+  const btn = el('button', 'primary wide', 'Начать');
+  btn.style.marginTop = '20px';
+  btn.addEventListener('click', () => { S.screen = 'v2quiz'; S.v2Index = 0; render(); });
+  card.appendChild(btn);
+  app.appendChild(card);
+}
+
+function formatDate(d) {
+  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }) +
+    ', ' + d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+}
+
+function v2NextButton() {
+  const btn = el('button', 'primary', 'Следующее испытание →');
+  btn.addEventListener('click', () => {
+    if (S.v2Index < V2_QUESTIONS.length - 1) {
+      S.v2Index += 1;
+      render();
+    } else {
+      S.screen = 'v3transition';
+      render();
+    }
+  });
+  return btn;
+}
+
+function renderV2Question() {
+  const q = V2_QUESTIONS[S.v2Index];
+  const openAt = new Date(CONFIG.v2Dates[q.n]);
+
+  const bar = el('div', 'topbar');
+  bar.appendChild(el('span', null, 'Испытание <strong>' + q.n + '</strong> из ' + V2_QUESTIONS.length));
+  bar.appendChild(el('span', null, S.nick));
+  app.appendChild(bar);
+
+  if (now() < openAt && !S.debugAll) {
+    const card = el('div', 'card locked-box');
+    addHudCorners(card);
+    card.appendChild(el('p', 'big', 'Испытание ещё не готово'));
+    card.appendChild(el('p', 'hint', 'Откроется ' + formatDate(openAt) + '.'));
+    app.appendChild(card);
+    setTimeout(() => { if (S.screen === 'v2quiz') render(); }, 60000);
+    return;
+  }
+
+  const card = el('div', 'card');
+  addHudCorners(card);
+
+  if (q.kind === 'link') {
+    const qBtn = el('button', 'q', q.text);
+    qBtn.addEventListener('click', () => window.open(q.linkUrl, '_blank', 'noopener'));
+    card.appendChild(qBtn);
+  } else {
+    card.appendChild(el('p', 'q', q.text));
+  }
+  if (q.hint) card.appendChild(el('p', 'hint', q.hint));
+
+  const rc = reachedCount(q.n);
+  card.appendChild(el('p', 'stage-stats', rc.reached + ' из ' + rc.total + ' дошли до этого вопроса'));
+
+  const body = el('div');
+  card.appendChild(body);
+  app.appendChild(card);
+
+  if (q.kind === 'countdown') { buildV2Countdown(q, body); return; }
+  buildV2Text(q, body); // 'text' и 'link'
+}
+
+function buildV2Text(q, body) {
+  const st = v2slot(q.n);
+
+  const label = el('label', 'field');
+  const input = el('input');
+  input.type = 'text';
+  input.placeholder = 'Твой ответ…';
+  input.value = st.value || '';
+  label.appendChild(input);
+  body.appendChild(label);
+
+  const row = el('div', 'row');
+  const answerBtn = el('button', 'ghost', 'Ответить');
+  row.appendChild(answerBtn);
+  body.appendChild(row);
+  const out = el('div');
+  body.appendChild(out);
+
+  const nb = v2NextButton();
+
+  function paint() {
+    out.innerHTML = '';
+    if (st.lastCorrect === undefined) return;
+    out.appendChild(st.lastCorrect ? verdict('ok', q.ok) : verdict('bad', 'Неправильно! Попробуй ещё раз.'));
+    if (st.passed && !row.contains(nb)) row.appendChild(nb);
+  }
+
+  async function submit() {
+    st.value = input.value;
+    st.lastCorrect = !!q.check(input.value);
+    if (st.lastCorrect) {
+      const wasPassed = !!st.passed;
+      st.passed = true;
+      SFX.correctV2();
+      saveProgress();
+      paint();
+      if (!wasPassed) {
+        void syncPlayerToServer('v2-' + q.n, { screen: 'v2quiz' });
+      }
+    } else {
+      SFX.wrongV2();
+      saveProgress();
+      paint();
+    }
+  }
+  answerBtn.addEventListener('click', submit);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+  if (st.lastCorrect !== undefined) paint();
+}
+
+function buildV2Countdown(q, body) {
+  const st = v2slot(q.n);
+  const start = new Date(CONFIG.birthdayStart);
+  const end = new Date(CONFIG.birthdayEnd);
+
+  if (!S.timerRevealed) { S.timerRevealed = true; saveProgress(); }
+
+  const box = el('div', 'countdown-box');
+  const label = el('p', 'hint');
+  label.style.textAlign = 'center';
+  body.appendChild(label);
+  body.appendChild(box);
+
+  const units = {};
+  const state = { h: null, m: null, sec: null };
+  [['h', 'ч'], ['m', 'мин'], ['sec', 'сек']].forEach(([key, lbl]) => {
+    const u = el('div', 'unit');
+    const num = el('div', 'num');
+    u.appendChild(num);
+    u.appendChild(el('div', 'lbl', lbl));
+    box.appendChild(u);
+    units[key] = num;
+  });
+
+  function paint() {
+    const t = now();
+    if (t < start) {
+      label.textContent = '';
+      updateTimerUnits(start - t);
+    } else if (t < end) {
+      label.textContent = 'Времени осталось на сегодня:';
+      updateTimerUnits(end - t);
+    } else {
+      label.textContent = 'С днём рождения меня!';
+      box.innerHTML = '';
+    }
+  }
+
+  function updateTimerUnits(ms) {
+    const parts = formatTimerParts(ms);
+    setTimerPart(units.h, parts.h, 'h', state);
+    setTimerPart(units.m, parts.m, 'm', state);
+    setTimerPart(units.sec, parts.sec, 'sec', state);
+  }
+
+  paint();
+  let tick = setInterval(() => {
+    if (S.screen !== 'v2quiz' || V2_QUESTIONS[S.v2Index] !== q) { clearInterval(tick); return; }
+    paint();
+  }, 1000);
+
+  const unlocked = now() >= start || S.debugAll;
+  const label2 = el('label', 'field');
+  const input = el('input');
+  input.type = 'text';
+  input.placeholder = unlocked ? 'Твой ответ…' : 'Пока рано…';
+  input.disabled = !unlocked;
+  input.value = st.value || '';
+  label2.appendChild(input);
+  body.appendChild(label2);
+
+  const row = el('div', 'row');
+  const answerBtn = el('button', 'ghost', 'Ответить');
+  answerBtn.disabled = !unlocked;
+  row.appendChild(answerBtn);
+  body.appendChild(row);
+  const out = el('div');
+  body.appendChild(out);
+
+  function paintVerdict() {
+    out.innerHTML = '';
+    if (st.lastCorrect === undefined) return;
+    out.appendChild(st.lastCorrect ? verdict('ok', q.ok) : verdict('bad', 'Неправильно! Попробуй ещё раз.'));
+  }
+
+  function submit() {
+    st.value = input.value;
+    st.lastCorrect = !!q.check(input.value);
+    if (st.lastCorrect) SFX.correctV2();
+    else SFX.wrongV2();
+    paintVerdict();
+    if (st.lastCorrect && !st.passed) {
+      st.passed = true;
+      saveProgress();
+      void syncPlayerToServer('v2-' + q.n, { screen: 'v2quiz' });
+      input.disabled = true;
+      answerBtn.disabled = true;
+      clearInterval(tick);
+      // Небольшая пауза после правильного ответа: таймер уже остановлен,
+      // экран остаётся неподвижным, затем начинается переход в Версию III.
+      setTimeout(() => {
+        if (S.screen === 'v2quiz' && V2_QUESTIONS[S.v2Index] === q) {
+          triggerV3Sequence();
+        }
+      }, 2200);
+      return;
+    }
+    saveProgress();
+  }
+  answerBtn.addEventListener('click', submit);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+  if (st.lastCorrect !== undefined) paintVerdict();
+}
+
+/* ---------- Переход в Версию III: тишина → тряска → светлая заливка ---------- */
+function triggerV3Sequence() {
+  // Передаём управление файлу verIIsfx.mp3: во время перехода нет других звуков.
+  stopV3Music();
+  playV2ToV3Sfx();
+  prepareV3MusicForLaunch();
+
+  if (globalTimerInterval) { clearInterval(globalTimerInterval); globalTimerInterval = null; }
+  const bar = document.querySelector('.global-timer');
+  if (bar) bar.remove();
+
+  // Белый слой стартует сразу и становится полностью непрозрачным ровно через 9 секунд.
+  document.body.classList.add('epic-shake-long');
+  const wash = el('div', 'v3-wash');
+  wash.style.transition = 'opacity 9s cubic-bezier(.32,.08,.12,1)';
+  wash.style.opacity = '0';
+  document.body.appendChild(wash);
+
+  requestAnimationFrame(() => { wash.style.opacity = '1'; });
+
+  const finishWhite = (ev) => {
+    if (ev.propertyName !== 'opacity' || wash.style.opacity !== '1') return;
+    wash.removeEventListener('transitionend', finishWhite);
+    document.body.classList.remove('epic-shake-long');
+    stopV2ToV3Sfx();
+    S.screen = 'v3transition';
+    render();
+    // Музыка стартует с самого начала именно при появлении Version III.
+    startV3Music(true);
+
+    setTimeout(() => {
+      wash.style.transition = 'opacity 3.2s cubic-bezier(.2,.75,.25,1)';
+      wash.style.opacity = '0';
+      setTimeout(() => wash.remove(), 3400);
+    }, 2600);
+  };
+  wash.addEventListener('transitionend', finishWhite);
+}
+
+function mountSnakeHotkey(q, st) {
+  snakeKeyHandler = (e) => {
+    // Надёжно определяем именно клавишу 7 на цифровом блоке.
+    // Основной вариант — code=Numpad7; location=3 покрывает браузеры/раскладки,
+    // где клавиша приходит с другим key, но всё ещё определяется как numpad.
+    const isNumpad7 = e.code === 'Numpad7' || (e.location === 3 && e.key === '7');
+    if (!isNumpad7) return;
+
+    // Все условия должны выполняться одновременно:
+    // 1) открыта Версия II;
+    // 2) открыт 14-й вопрос первой версии;
+    // 3) у пользователя сейчас ровно 14:00 по локальным часам;
+    // 4) нажата Numpad 7.
+    if (!S.unlocked || S.screen !== 'quiz' || q.n !== 14 || S.index !== 13) return;
+
+    const currentTime = new Date();
+    const is1400 = currentTime.getHours() === 14 && currentTime.getMinutes() === 0;
+    if (!is1400 || document.querySelector('.snake-overlay')) return;
+
+    e.preventDefault();
+    launchSnake(q, st);
+  };
+  document.addEventListener('keydown', snakeKeyHandler);
+}
+
+function launchSnake(q, st) {
+  const overlay = el('div', 'snake-overlay');
+  const scoreEl = el('div', 'score', 'Яблоки: 0');
+  const canvas = document.createElement('canvas');
+  const size = 20, cells = 14;
+  canvas.width = size * cells;
+  canvas.height = size * cells;
+  const hint = el('p', 'hint', 'Управление - Стрелки/WASD');
+  hint.style.color = '#cbb8e0';
+  overlay.appendChild(scoreEl);
+  overlay.appendChild(canvas);
+  overlay.appendChild(hint);
+  document.body.appendChild(overlay);
+
+  const ctx = canvas.getContext('2d');
+  let snake = [{ x: 7, y: 7 }];
+  let dir = { x: 1, y: 0 };
+  let nextDir = dir;
+  let apple = spawnApple();
+  let apples = 0;
+  let dead = false;
+
+  function spawnApple() {
+    let p;
+    do {
+      p = { x: Math.floor(Math.random() * cells), y: Math.floor(Math.random() * cells) };
+    } while (snake.some(s => s.x === p.x && s.y === p.y));
+    return p;
+  }
+
+  function onKey(e) {
+    const map = {
+      ArrowUp: { x: 0, y: -1 }, ArrowDown: { x: 0, y: 1 },
+      ArrowLeft: { x: -1, y: 0 }, ArrowRight: { x: 1, y: 0 },
+      w: { x: 0, y: -1 }, a: { x: -1, y: 0 }, s: { x: 0, y: 1 }, d: { x: 1, y: 0 },
+      W: { x: 0, y: -1 }, A: { x: -1, y: 0 }, S: { x: 0, y: 1 }, D: { x: 1, y: 0 },
+    };
+    const d = map[e.key];
+    if (!d) return;
+    if (d.x === -dir.x && d.y === -dir.y) return;
+    nextDir = d;
+  }
+  document.addEventListener('keydown', onKey);
+
+  function draw() {
+    ctx.fillStyle = '#100a18';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#f2b705';
+    ctx.fillRect(apple.x * size, apple.y * size, size - 2, size - 2);
+    ctx.fillStyle = '#c9a6ff';
+    snake.forEach(s => ctx.fillRect(s.x * size, s.y * size, size - 2, size - 2));
+  }
+
+  function closeSnakeOverlay(next) {
+    if (!overlay.isConnected || overlay.classList.contains('snake-closing')) return;
+    overlay.classList.add('snake-closing');
+    setTimeout(() => {
+      overlay.remove();
+      if (typeof next === 'function') next();
+    }, 280);
+  }
+
+  function finish() {
+    dead = true;
+    clearInterval(loop);
+    document.removeEventListener('keydown', onKey);
+    const previousRecord = Math.max(Number(st.bestApples) || 28, 28);
+    const newRecord = apples > previousRecord;
+    st.bestApples = Math.max(previousRecord, apples);
+    if (newRecord) {
+      SFX.record();
+    }
+    saveProgress();
+    const msg = el('div', 'msg');
+    msg.textContent = 'Игра окончена. Яблок: ' + apples + '. Рекорд: ' + st.bestApples;
+    overlay.appendChild(msg);
+    if (newRecord) {
+      const recordMsg = el('div', 'msg', 'ПОЗДРАВЛЯЕМ! Новый рекорд! TrueGamer316: ' + st.bestApples);
+      recordMsg.style.color = '#8fd19e';
+      recordMsg.style.marginTop = '-4px';
+      recordMsg.style.fontSize = '1.02rem';
+      overlay.appendChild(recordMsg);
+    }
+    const row = el('div', 'row');
+    row.style.justifyContent = 'center';
+    const again = el('button', 'primary', 'Ещё раз');
+    again.addEventListener('click', () => { closeSnakeOverlay(() => launchSnake(q, st)); });
+    const close = el('button', 'ghost', 'Закрыть');
+    close.addEventListener('click', () => { closeSnakeOverlay(() => render()); });
+    row.appendChild(again);
+    row.appendChild(close);
+    overlay.appendChild(row);
+  }
+
+  function tick() {
+    if (dead) return;
+    dir = nextDir;
+    const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+    if (head.x < 0 || head.y < 0 || head.x >= cells || head.y >= cells ||
+        snake.some(s => s.x === head.x && s.y === head.y)) {
+      return finish();
+    }
+    snake.unshift(head);
+    if (head.x === apple.x && head.y === apple.y) {
+      apples += 1;
+      SFX.apple();
+      scoreEl.textContent = 'Яблоки: ' + apples;
+      apple = spawnApple();
+    } else {
+      snake.pop();
+    }
+    draw();
+  }
+
+  draw();
+  const loop = setInterval(tick, 160);
+}
+
+/* ============================================================
+   ВЕРСИЯ III
+   ============================================================ */
+function renderV3Transition() {
+  const wrap = el('div', 'v3-transition-text',
+    'Скоро ты дойдёшь до конца, осталось немного.<br>Я не задержу тебя надолго, но ответь, пожалуйста, ещё на пару вопросов.');
+  app.appendChild(wrap);
+  setTimeout(() => {
+    S.screen = 'v3quiz';
+    S.v3Index = 0;
+    render();
+  }, 14000);
+}
+
+function renderV3Question() {
+  const i = S.v3Index;
+  const text = V3_QUESTIONS[i];
+  const card = el('div', 'v3-card');
+  card.appendChild(el('p', 'q', text));
+
+  const label = el('label', 'field');
+  const textarea = el('textarea');
+  textarea.rows = 3;
+  textarea.placeholder = 'Пиши свободно…';
+  textarea.value = (S.v3Answers[i] && S.v3Answers[i].a) || '';
+  label.appendChild(textarea);
+  card.appendChild(label);
+
+  const row = el('div', 'row');
+  row.style.justifyContent = 'center';
+  const btn = el('button', 'primary floaty', i < V3_QUESTIONS.length - 1 ? 'Дальше' : 'Завершить');
+  row.appendChild(btn);
+  card.appendChild(row);
+  app.appendChild(card);
+
+  btn.addEventListener('click', async () => {
+    if (btn.disabled) return;
+    S.v3Answers[i] = { q: text, a: textarea.value };
+    saveProgress();
+    if (i < V3_QUESTIONS.length - 1) {
+      S.v3Index += 1;
+      render();
+    } else {
+      btn.disabled = true;
+      btn.textContent = 'Сохраняем…';
+      S.screen = 'v3final';
+      saveProgress();
+      await syncPlayerToServer('v3-complete', { screen: 'v3final' });
+      void sendForReview({ nick: S.nick, v3: S.v3Answers, finishedAt: Date.now() });
+      render();
+    }
+  });
+}
+
+function renderV3Final() {
+  const wrap = el('div', 'v3-final-wrap');
+  const box = el('div', 'v3-final-msg', friendMessage(S.nick));
+  wrap.appendChild(box);
+
+  startV3Music();
+
+  app.appendChild(wrap);
+}
+
+render();
+</script>
+</body>
+</html>
