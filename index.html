@@ -1468,7 +1468,7 @@ function audioCtx() {
   try {
     AUDIO.ctx = new Ctx();
     AUDIO.master = AUDIO.ctx.createGain();
-    AUDIO.master.gain.value = 0.32;
+    AUDIO.master.gain.value = 0.78; // UI/SFX: заметно громче относительно MP3
     AUDIO.master.connect(AUDIO.ctx.destination);
   } catch (_) {
     return null;
@@ -1702,7 +1702,7 @@ function startV3Music(reset = false) {
   const audio = ensureV3Music();
   if (!audio) return;
   if (reset) audio.currentTime = 0;
-  audio.volume = 0.72;
+  audio.volume = 0.38; // Музыка III: тише, чтобы не забивать UI-звуки
   audio.play().catch(() => {});
 }
 
@@ -1719,7 +1719,7 @@ function prepareV2ToV3Sfx() {
   const audio = document.createElement('audio');
   audio.preload = 'auto';
   audio.loop = false;
-  audio.volume = 0.88;
+  audio.volume = 0.48; // Переход II→III: тише относительно UI-звуков
   audio.src = CONFIG.v2ToV3SfxUrl;
   audio.dataset.v2ToV3Sfx = '1';
   audio.addEventListener('error', () => {
@@ -1755,7 +1755,7 @@ function prepareV2UnlockSfx(key) {
   const audio = document.createElement('audio');
   audio.preload = 'auto';
   audio.loop = false;
-  audio.volume = 0.9;
+  audio.volume = 0.50; // Звуки разблокировки II: тише относительно UI-звуков
   audio.src = url;
   audio.dataset.v2UnlockSfx = key;
   audio.addEventListener('error', () => {
