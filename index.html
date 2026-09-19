@@ -812,6 +812,25 @@
 <div class="wrap" id="app"></div>
 
 <script>
+window.addEventListener('error', function (e) {
+  document.body.innerHTML =
+    '<pre style="white-space:pre-wrap;padding:30px;color:#b00020;font:16px monospace;">' +
+    'ОШИБКА JAVASCRIPT\n\n' +
+    e.message + '\n\n' +
+    (e.filename || '') + ':' + (e.lineno || '') + ':' + (e.colno || '') +
+    '</pre>';
+});
+
+window.addEventListener('unhandledrejection', function (e) {
+  document.body.innerHTML =
+    '<pre style="white-space:pre-wrap;padding:30px;color:#b00020;font:16px monospace;">' +
+    'ОШИБКА PROMISE\n\n' +
+    String(e.reason) +
+    '</pre>';
+});
+</script>
+  
+<script>
 /* =======================================================================
    НАСТРОЙКИ — правь здесь
    ======================================================================= */
@@ -917,8 +936,6 @@ function trustedNow() {
 
   return new Date(ms);
 }
-
-const TRUSTED_TIME_PROMISE = syncTrustedTime();
 
 /* =======================================================================
    ХРАНЕНИЕ ПРОГРЕССА
@@ -3422,7 +3439,7 @@ function renderV3Final() {
 
   app.appendChild(wrap);
 }
-
+syncTrustedTime();
 render();
 </script>
 </body>
