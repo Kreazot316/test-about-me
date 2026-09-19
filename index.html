@@ -2931,7 +2931,6 @@ function formatDate(d) {
     timeZone: 'Europe/Riga',
   }).format(d);
 }
-}
 
 function v2NextButton() {
   const btn = el('button', 'primary', 'Следующее испытание →');
@@ -3125,7 +3124,7 @@ function buildV2Countdown(q, body) {
     paint();
   }, 1000);
 
-  const unlocked = t >= start || S.debugAll;
+  const unlocked = trustedNow() >= start || S.debugAll;
   const label2 = el('label', 'field');
   const input = el('input');
   input.type = 'text';
