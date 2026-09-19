@@ -825,16 +825,17 @@ const CONFIG = {
 
   v2Code: '75144747',          // код, открывающий Версию II (вводится в любое поле, кроме ника)
   debugCode: '69tetoteto67',   // служебный код: мгновенный доступ ко всем вопросам всех версий, для тестов
-  v2Dates: {                   // даты открытия вопросов Версии II
-    1: '2026-10-31T00:00:00',
-    2: '2026-10-31T00:00:00',
-    3: '2026-11-02T00:00:00',
-    4: '2026-11-02T00:00:00',
-    5: '2026-11-04T00:00:00',
+  v2Dates: {
+    1: '2026-10-31T00:00:00+02:00',
+    2: '2026-10-31T00:00:00+02:00',
+    3: '2026-11-02T00:00:00+02:00',
+    4: '2026-11-02T00:00:00+02:00',
+    5: '2026-11-04T00:00:00+02:00',
   },
-  birthdayStart: '2026-11-04T00:00:00', // начало 24-часового таймера вопроса II-5
-  birthdayEnd: '2026-11-05T00:00:00',
-
+  
+  birthdayStart: '2026-11-04T00:00:00+02:00',
+  birthdayEnd: '2026-11-05T00:00:00+02:00',
+  
   calmMusicUrl: 'audio/MyConfession.mp3', // Версия III: положи свою музыку в audio/MyConfession.mp3 рядом с HTML
   v2ToV3SfxUrl: 'audio/verIIsfx.mp3', // Звук перехода II→III: 9-секундный файл verIIsfx.mp3
   v2UnlockSfx: {
@@ -846,6 +847,7 @@ const CONFIG = {
   },
   reviewEndpoint: '',          // legacy: внешний webhook, если понадобится позже
   serverEndpoint: 'https://birthday-quest-api.kreazot316.workers.dev/api/player', // вставь сюда URL своего Cloudflare Worker
+  timeEndpoint: 'https://birthday-quest-api.kreazot316.workers.dev/api/time',
 
   // ЗАГЛУШКА до серверной версии: сколько друзей дошли до каждого вопроса Версии II.
   // Когда появится бэкенд с реальными данными — reachedCount() ниже переключишь на запрос к нему.
@@ -854,7 +856,8 @@ const CONFIG = {
   friendMessages: {
     // ключ — ник друга в нижнем регистре без пробелов, значение — твоё персональное сообщение
     // '__default__' — сообщение для всех, кому не задано персональное
-    __default__: 'Спасибо, что дошёл(-шла) до конца. Ты значишь для меня очень много — с днём рождения меня, и спасибо, что рядом! 💜',
+    __default__: 'Спасибо, что дошёл(-шла) до конца. Ты значишь для меня очень много - с днём рождения меня, и спасибо, что рядом! 💜',
+    абоба: "Спасибо, дорогой бетатестер абоба, что смог дойти до конца!"
   },
 };
 
@@ -864,36 +867,58 @@ const CONFIG = {
    время — это best-effort синхронизация с публичным time-API с откатом на
    локальные часы устройства, если запрос не прошёл (нет сети/офлайн/блок).
    ======================================================================= */
-let TIME_OFFSET = 0; // serverTime - Date.now()
+let SERVER_TIME_AT_START = null;
+let PERF_TIME_AT_START = null;
+let SERVER_TIME_READY = false;
+let SERVER_TIME_FAILED = false;
 
-async function syncTime() {
-  const endpoints = [
-    'https://worldtimeapi.org/api/timezone/Etc/UTC',
-    'https://timeapi.io/api/Time/current/zone?timeZone=UTC',
-  ];
-  for (const url of endpoints) {
-    try {
-      const res = await fetch(url, { cache: 'no-store' });
-      const data = await res.json();
-      const iso = data.utc_datetime || data.dateTime || data.currentDateTime;
-      const server = new Date(iso).getTime();
-      if (!isNaN(server)) {
-        TIME_OFFSET = server - Date.now();
-        return;
-      }
-    } catch (e) {
-      /* пробуем следующий источник */
+async function syncTrustedTime() {
+  try {
+    const res = await fetch(CONFIG.timeEndpoint, {
+      cache: 'no-store',
+    });
+
+    if (!res.ok) {
+      throw new Error('Time request failed');
     }
+
+    const data = await res.json();
+    const serverTime = Number(data.now);
+
+    if (!Number.isFinite(serverTime)) {
+      throw new Error('Invalid server time');
+    }
+
+    SERVER_TIME_AT_START = serverTime;
+    PERF_TIME_AT_START = performance.now();
+    SERVER_TIME_READY = true;
+
+  } catch (e) {
+    SERVER_TIME_FAILED = true;
+    console.error('Trusted time sync failed:', e);
   }
-  TIME_OFFSET = 0; // не удалось — считаем по локальным часам
+
+  if (S.screen === 'v2quiz') {
+    render();
+  }
 }
 
-function now() {
-  return new Date(Date.now() + TIME_OFFSET);
+function trustedNowMs() {
+  if (!SERVER_TIME_READY) return null;
+
+  return SERVER_TIME_AT_START +
+    (performance.now() - PERF_TIME_AT_START);
 }
 
-syncTime();
-setInterval(syncTime, 5 * 60 * 1000);
+function trustedNow() {
+  const ms = trustedNowMs();
+
+  if (ms === null) return null;
+
+  return new Date(ms);
+}
+
+const TRUSTED_TIME_PROMISE = syncTrustedTime();
 
 /* =======================================================================
    ХРАНЕНИЕ ПРОГРЕССА
@@ -2095,7 +2120,7 @@ function mountGlobalTimer() {
 
   function tick() {
     if (!document.body.contains(bar)) { clearInterval(globalTimerInterval); globalTimerInterval = null; return; }
-    const t = now();
+    const t = trustedNow();
     if (t >= end) {
       icon.textContent = '';
       value.textContent = 'С днём рождения!';
@@ -2898,8 +2923,14 @@ function renderV2Intro() {
 }
 
 function formatDate(d) {
-  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }) +
-    ', ' + d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  return new Intl.DateTimeFormat('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'Europe/Riga',
+  }).format(d);
+}
 }
 
 function v2NextButton() {
@@ -2925,13 +2956,48 @@ function renderV2Question() {
   bar.appendChild(el('span', null, S.nick));
   app.appendChild(bar);
 
-  if (now() < openAt && !S.debugAll) {
+  if (!SERVER_TIME_READY && !S.debugAll) {
+    const card = el('div', 'card locked-box');
+    addHudCorners(card);
+
+    if (SERVER_TIME_FAILED) {
+      card.appendChild(el('p', 'big', 'Не удалось проверить время'));
+      card.appendChild(el(
+        'p',
+        'hint',
+        'Обнови страницу и попробуй снова.'
+      ));
+    } else {
+      card.appendChild(el('p', 'big', 'Синхронизация времени…'));
+      card.appendChild(el(
+        'p',
+        'hint',
+        'Проверяем точное время сервера.'
+      ));
+    }
+
+    app.appendChild(card);
+    return;
+  }
+
+  const currentTrustedTime = trustedNow();
+
+  if (
+    currentTrustedTime < openAt &&
+    !S.debugAll
+  ) {
     const card = el('div', 'card locked-box');
     addHudCorners(card);
     card.appendChild(el('p', 'big', 'Испытание ещё не готово'));
-    card.appendChild(el('p', 'hint', 'Откроется ' + formatDate(openAt) + '.'));
+    card.appendChild(el(
+      'p',
+      'hint',
+      'Откроется ' + formatDate(openAt) + '.'
+    ));
     app.appendChild(card);
-    setTimeout(() => { if (S.screen === 'v2quiz') render(); }, 60000);
+    setTimeout(() => {
+      if (S.screen === 'v2quiz') render();
+    }, 60000);
     return;
   }
 
@@ -3033,7 +3099,7 @@ function buildV2Countdown(q, body) {
   });
 
   function paint() {
-    const t = now();
+    const t = trustedNow();
     if (t < start) {
       label.textContent = '';
       updateTimerUnits(start - t);
@@ -3059,7 +3125,7 @@ function buildV2Countdown(q, body) {
     paint();
   }, 1000);
 
-  const unlocked = now() >= start || S.debugAll;
+  const unlocked = t >= start || S.debugAll;
   const label2 = el('label', 'field');
   const input = el('input');
   input.type = 'text';
