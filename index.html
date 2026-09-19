@@ -440,6 +440,7 @@
   }
   .v1-falling-copy {
     will-change: transform, opacity, filter;
+    contain: layout style paint;
     transform-origin: 50% 50%;
     pointer-events: none;
     backface-visibility: hidden;
@@ -806,6 +807,33 @@
     color: #4a3b34; background: rgba(255,255,255,.72); padding: 30px 26px; border-radius: 18px;
     box-shadow: 0 20px 50px -20px rgba(0,0,0,.35); animation: rise .8s ease;
   }
+
+/* ===================== ПРЕДПОДГОТОВКА АНИМАЦИЙ ===================== */
+
+body {
+  will-change: transform;
+}
+
+.crack-overlay,
+.crack-line,
+.flash-overlay,
+.v1-fall-layer,
+.v1-falling-copy,
+.version-switch-overlay,
+.snake-overlay,
+.v3-wash {
+  will-change: transform, opacity, filter;
+}
+
+body.v2-shake-small,
+body.v2-shake-medium,
+body.v2-shake-large,
+body.v2-catastrophe,
+body.epic-shake,
+body.epic-shake-long {
+  will-change: transform, opacity, filter;
+}
+  
 </style>
 </head>
 <body>
@@ -1415,6 +1443,21 @@ const AUDIO = {
   v2ToV3SfxPathIndex: 0,
   v2UnlockSfx: {},
 };
+function preloadV2UnlockSounds() {
+  if (!CONFIG.v2UnlockSfx) return;
+
+  Object.keys(CONFIG.v2UnlockSfx).forEach(key => {
+    prepareV2UnlockSfx(key);
+  });
+
+  if (CONFIG.v2ToV3SfxUrl) {
+    prepareV2ToV3Sfx();
+  }
+
+  if (CONFIG.calmMusicUrl) {
+    ensureV3Music();
+  }
+}
 
 function audioCtx() {
   if (AUDIO.ctx) return AUDIO.ctx;
@@ -1738,7 +1781,8 @@ function stopV2UnlockSfx() {
     try { audio.pause(); audio.currentTime = 0; } catch (_) {}
   });
 }
-
+preloadV2UnlockSounds();
+  
 document.addEventListener('visibilitychange', () => {
   const ctx = AUDIO.ctx;
   if (!ctx || !AUDIO.ambient) return;
@@ -1872,19 +1916,28 @@ function triggerV2Unlock() {
   }
 
   // Этап 1: лёгкие трещины + 1.mp3.
-  burst('v2-shake-small', 0, 4, 4, 280);
-  allTimers.push(setTimeout(() => playV2UnlockSfx('crack1'), 180));
+  playV2UnlockSfx('crack1');
+  allTimers.push(setTimeout(() => {
+    burst('v2-shake-small', 0, 4, 4, 280);
+  }, 180));
 
   // Этап 2: уже серьёзно + 2.mp3.
-  burst('v2-shake-medium', 1450, 8, 9, 360);
-  allTimers.push(setTimeout(() => playV2UnlockSfx('crack2'), 1580));
+  allTimers.push(setTimeout(() => {
+    playV2UnlockSfx('crack2');
+  
+    setTimeout(() => {
+      burst('v2-shake-medium', 0, 8, 9, 360);
+    }, 180);
+  }, 1450);
 
   // Этап 3: большой выброс — много трещин, сильная тряска, глитч и 3.mp3.
-  burst('v2-shake-large', 3150, 20, 28, 520, 'v2-catastrophe');
-  allTimers.push(setTimeout(() => playV2UnlockSfx('crack3'), 3200));
-  allTimers.push(setTimeout(() => addCracks(12, 42, 460, 28), 3450));
-  allTimers.push(setTimeout(() => { document.body.classList.add('epic-shake'); }, 3650));
-  allTimers.push(setTimeout(() => { document.body.classList.remove('epic-shake'); }, 4520));
+  allTimers.push(setTimeout(() => {
+    playV2UnlockSfx('crack3');
+  
+    setTimeout(() => {
+      burst('v2-shake-large', 0, 20, 28, 520, 'v2-catastrophe');
+    }, 220);
+  }, 3150));
 
   // Этап 4: интерфейс первой версии медленно срывается вниз целыми элементами.
   allTimers.push(setTimeout(() => {
@@ -2241,6 +2294,22 @@ function renderIntro() {
   async function start() {
     const v = input.value.trim();
     if (!v || btn.disabled) return;
+
+    if (tight(v) === 'kreazot316') {
+      app.innerHTML = '';
+    
+      const errorCard = el('div', 'card');
+      errorCard.appendChild(el('h1', null, 'Ошибка'));
+      errorCard.appendChild(el(
+        'p',
+        'lead',
+        '(секретный код): Моё имя брать нельзя ;P'
+      ));
+    
+      app.appendChild(errorCard);
+      return;
+    }
+    
     btn.disabled = true;
     note.textContent = 'Синхронизация с сервером…';
 
