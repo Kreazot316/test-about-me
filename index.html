@@ -299,14 +299,15 @@
     80% { transform: translate(-5px,-4px) rotate(-.16deg); }
   }
   @keyframes v2ShakeLarge {
-    0%,100% { transform: translate(0,0) rotate(0) scale(1); filter: none; }
-    10% { transform: translate(-12px,7px) rotate(-.5deg) scale(1.002); filter: contrast(1.08); }
-    22% { transform: translate(10px,-9px) rotate(.55deg) scale(.998); }
-    34% { transform: translate(-15px,4px) rotate(-.58deg) scale(1.003); filter: saturate(1.35); }
-    46% { transform: translate(14px,10px) rotate(.52deg) scale(.998); }
-    58% { transform: translate(-11px,-8px) rotate(-.48deg) scale(1.004); filter: contrast(1.18); }
-    70% { transform: translate(16px,5px) rotate(.6deg) scale(.997); }
-    82% { transform: translate(-9px,8px) rotate(-.42deg) scale(1.003); filter: saturate(1.5) contrast(1.1); }
+    /* filter на body заставляет перерисовывать страницу каждый кадр. */
+    0%,100% { transform: translate3d(0,0,0) rotate(0) scale(1); }
+    10% { transform: translate3d(-12px,7px,0) rotate(-.5deg) scale(1.002); }
+    22% { transform: translate3d(10px,-9px,0) rotate(.55deg) scale(.998); }
+    34% { transform: translate3d(-15px,4px,0) rotate(-.58deg) scale(1.003); }
+    46% { transform: translate3d(14px,10px,0) rotate(.52deg) scale(.998); }
+    58% { transform: translate3d(-11px,-8px,0) rotate(-.48deg) scale(1.004); }
+    70% { transform: translate3d(16px,5px,0) rotate(.6deg) scale(.997); }
+    82% { transform: translate3d(-9px,8px,0) rotate(-.42deg) scale(1.003); }
   }
   body.v2-shake-small { animation: v2ShakeSmall .48s cubic-bezier(.36,.07,.19,.97) 1; }
   body.v2-shake-medium { animation: v2ShakeMedium .72s cubic-bezier(.36,.07,.19,.97) 1; }
@@ -319,7 +320,8 @@
   body.v2-catastrophe::after {
     content: ''; position: fixed; inset: 0; z-index: 54; pointer-events: none;
     background: repeating-linear-gradient(0deg, transparent 0 7px, rgba(255,255,255,.055) 7px 9px);
-    mix-blend-mode: screen;
+    /* Отказ от смешивания с целой страницей — критично для мобильных GPU. */
+    opacity: .35;
     animation: v2ScanBurst .18s steps(2,end) 6;
   }
   @keyframes v2Catastrophe {
@@ -441,7 +443,8 @@
     overflow: hidden;
   }
   .v1-falling-copy {
-    will-change: transform, opacity, filter;
+    /* Падение идёт на compositor: фильтры крупных копий интерфейса сильно тормозили. */
+    will-change: transform, opacity;
     contain: layout style paint;
     transform-origin: 50% 50%;
     pointer-events: none;
@@ -820,7 +823,6 @@ body {
 .crack-line,
 .flash-overlay,
 .v1-fall-layer,
-.v1-falling-copy,
 .version-switch-overlay,
 .snake-overlay,
 .v3-wash {
@@ -833,7 +835,7 @@ body.v2-shake-large,
 body.v2-catastrophe,
 body.epic-shake,
 body.epic-shake-long {
-  will-change: transform, opacity, filter;
+  will-change: transform, opacity;
 }
   
 </style>
@@ -865,15 +867,12 @@ window.addEventListener('unhandledrejection', function (e) {
    НАСТРОЙКИ — правь здесь
    ======================================================================= */
 const CONFIG = {
-  participantCount: '15',      // вопрос 2: реальное число участников
   sportsTarget: 10,            // вопрос 6: сколько уникальных верных до кода
-  gamesTarget: 5,              // вопрос 11: сколько разных игр для прохождения
-  clickerSeconds: 20,          // вопрос 8: длительность кликера
-  cookingVideoUrl: '',         // вопрос 12: ссылка на видео (пока пусто)
-  botName: '@St0rytell3rBot',  // вопрос 15
+  gamesTarget: 5,               // вопрос 11: сколько разных игр для прохождения
+  clickerSeconds: 20,           // вопрос 8: длительность кликера
+  cookingVideoUrl: '',          // вопрос 12: ссылка на видео (пока пусто)
+  botName: '@St0rytell3rBot',   // вопрос 15
 
-  v2Code: '75144747',          // код, открывающий Версию II (вводится в любое поле, кроме ника)
-  debugCode: '69tetoteto67',   // служебный код: мгновенный доступ ко всем вопросам всех версий, для тестов
   v2Dates: {
     1: '2026-10-31T00:00:00+02:00',
     2: '2026-10-31T00:00:00+02:00',
@@ -895,19 +894,18 @@ const CONFIG = {
     blackHum: 'audio/5.mp3',
   },
   reviewEndpoint: '',          // legacy: внешний webhook, если понадобится позже
-  serverEndpoint: 'https://birthday-quest-api.kreazot316.workers.dev/api/player', // вставь сюда URL своего Cloudflare Worker
-  timeEndpoint: 'https://birthday-quest-api.kreazot316.workers.dev/api/time',
 
-  // ЗАГЛУШКА до серверной версии: сколько друзей дошли до каждого вопроса Версии II.
-  // Когда появится бэкенд с реальными данными — reachedCount() ниже переключишь на запрос к нему.
-  v2ReachedStats: { 1: 15, 2: 11, 3: 9, 4: 7, 5: 5 },
+  // Бэкенд на Google Apps Script + Google Таблице (см. Code.gs).
+  // Оба поля — один и тот же URL веб-приложения (заканчивается на /exec):
+  // один и тот же скрипт отдаёт и время, и прогресс, различая запросы по ?action=.
+  serverEndpoint: 'https://script.google.com/macros/s/AKfycbwD5gGhNvXH_CensImeeSoIBJv0RXqLw6zzs4X5tuAtpiRVKucoVk5UHlzUyKvmQ4-A/exec',
+  timeEndpoint: 'https://script.google.com/macros/s/AKfycbwD5gGhNvXH_CensImeeSoIBJv0RXqLw6zzs4X5tuAtpiRVKucoVk5UHlzUyKvmQ4-A/exec',
 
-  friendMessages: {
-    // ключ — ник друга в нижнем регистре без пробелов, значение — твоё персональное сообщение
-    // '__default__' — сообщение для всех, кому не задано персональное
-    __default__: 'Спасибо, что дошёл(-шла) до конца. Ты значишь для меня очень много - с днём рождения меня, и спасибо, что рядом! 💜',
-    абоба: "Спасибо, дорогой бетатестер, что смог дойти до конца!"
-  },
+
+  // Текст на финальном экране, пока ответ загружается из Google Таблицы.
+  friendMessageLoadingText: 'Подожди немного…',
+  // Запасной текст: используется только при недоступном сервере или пустом листе.
+  defaultFriendMessage: 'Спасибо, что дошёл(-шла) до конца. Ты значишь для меня очень много — с днём рождения меня, и спасибо, что рядом! 💜',
 };
 
 /* =======================================================================
@@ -923,7 +921,7 @@ let SERVER_TIME_FAILED = false;
 
 async function syncTrustedTime() {
   try {
-    const res = await fetch(CONFIG.timeEndpoint, {
+    const res = await fetch(CONFIG.timeEndpoint + '?action=time', {
       cache: 'no-store',
     });
 
@@ -985,6 +983,7 @@ function makeProgressSnapshot(overrides = {}) {
     unlocked: S.unlocked,
     v2Index: S.v2Index,
     v2Answers: S.v2Answers,
+    v2TotalQuestions: V2_QUESTIONS.length,
     v3Index: S.v3Index,
     v3Answers: S.v3Answers,
     timerRevealed: S.timerRevealed,
@@ -1026,13 +1025,160 @@ function saveProgress() {
 }
 
 function serverSyncEnabled() {
-  return Boolean(CONFIG.serverEndpoint) && !CONFIG.serverEndpoint.includes('YOUR-WORKER');
+  return Boolean(CONFIG.serverEndpoint) && !CONFIG.serverEndpoint.includes('YOUR-DEPLOYMENT-ID');
+}
+
+/* =======================================================================
+   ANSWER BANK — ответы/ключи приходят из Google Таблицы, а не из HTML
+   ======================================================================= */
+let QUESTION_BANK = null;
+let QUESTION_BANK_FAILED = false;
+let QUESTION_BANK_LOADING = null;
+
+async function loadQuestionBank() {
+  if (!serverSyncEnabled()) return false;
+  if (QUESTION_BANK) return true;
+  if (QUESTION_BANK_LOADING) return QUESTION_BANK_LOADING;
+
+  QUESTION_BANK_LOADING = (async () => {
+    try {
+      const res = await fetch(CONFIG.serverEndpoint + '?action=question_bank', {
+        cache: 'no-store',
+      });
+      if (!res.ok) throw new Error('Question bank request failed');
+
+      const data = await res.json();
+      if (
+        !data ||
+        !data.v1 ||
+        !data.v1['1'] ||
+        !data.v2 ||
+        !data.v2['1'] ||
+        !data.codes ||
+        !data.codes.v2Unlock
+      ) {
+        throw new Error('Invalid or empty question bank');
+      }
+
+      QUESTION_BANK = data;
+      QUESTION_BANK_FAILED = false;
+      return true;
+    } catch (e) {
+      QUESTION_BANK_FAILED = true;
+      console.error('Question bank load failed:', e);
+      return false;
+    }
+  })();
+
+  const result = await QUESTION_BANK_LOADING;
+  QUESTION_BANK_LOADING = null;
+  return result;
+}
+
+function bankEntry(version, n) {
+  if (!QUESTION_BANK || !QUESTION_BANK[version]) return null;
+  return QUESTION_BANK[version][String(n)] || QUESTION_BANK[version][n] || null;
+}
+
+function bankData(version, n) {
+  const entry = bankEntry(version, n);
+  return entry && entry.data ? entry.data : {};
+}
+
+function bankMessage(version, n) {
+  const entry = bankEntry(version, n);
+  return (entry && entry.success) || 'Правильно!';
+}
+
+function bankBadMessage(version, n) {
+  const entry = bankEntry(version, n);
+  return (entry && entry.bad) || 'Неправильно!';
+}
+
+function normalizeBankValue(value, mode) {
+  if (mode === 'digits') return digits(value);
+  if (mode === 'norm') return norm(value);
+  return tight(value);
+}
+
+function bankCheck(version, n, value) {
+  const entry = bankEntry(version, n);
+  if (!entry) return false;
+
+  const mode = entry.mode || 'tight';
+  const accepted = Array.isArray(entry.accepted) ? entry.accepted : [];
+
+  if (mode === 'free') return String(value || '').trim().length > 0;
+
+  if (mode === 'contains_tight_any') {
+    const t = tight(value);
+    return accepted.some(x => t.includes(tight(x)));
+  }
+
+  if (mode === 'norm_groups' || mode === 'tight_groups') {
+    const probe = normalizeBankValue(value, mode === 'norm_groups' ? 'norm' : 'tight');
+    return accepted.some(group =>
+      Array.isArray(group) && group.some(x => normalizeBankValue(x, mode === 'norm_groups' ? 'norm' : 'tight') === probe)
+    );
+  }
+
+  const probe = normalizeBankValue(value, mode);
+  return accepted.some(x => normalizeBankValue(x, mode) === probe);
+}
+
+function bankMatchGroup(version, n, value) {
+  const entry = bankEntry(version, n);
+  if (!entry) return null;
+
+  const mode = entry.mode;
+  if (mode !== 'norm_groups' && mode !== 'tight_groups') return null;
+
+  const probe = normalizeBankValue(value, mode === 'norm_groups' ? 'norm' : 'tight');
+  for (let i = 0; i < entry.accepted.length; i++) {
+    const group = entry.accepted[i];
+    if (Array.isArray(group) && group.some(x =>
+      normalizeBankValue(x, mode === 'norm_groups' ? 'norm' : 'tight') === probe
+    )) {
+      return i;
+    }
+  }
+  return null;
+}
+
+async function recordV1Answer(question, answer, correct, passed, details = {}) {
+  if (!S.nick || !serverSyncEnabled()) return;
+  try {
+    await fetch(CONFIG.serverEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        action: 'record_v1_answer',
+        nick: S.nick,
+        question: question,
+        answer: answer == null ? '' : String(answer),
+        correct: !!correct,
+        passed: !!passed,
+        details: details || {},
+        sentAt: Date.now(),
+      }),
+      cache: 'no-store',
+    });
+  } catch (e) {
+    /* Журнал ответов — дополнительная статистика, квест не ломаем при сбое. */
+  }
+}
+
+function secretCodeType(value) {
+  if (!QUESTION_BANK || !QUESTION_BANK.codes) return '';
+  if (value === QUESTION_BANK.codes.debug) return 'debug';
+  if (value === QUESTION_BANK.codes.v2Unlock) return 'v2';
+  return '';
 }
 
 async function loadServerProgress(nick) {
   if (!serverSyncEnabled()) return null;
   try {
-    const url = CONFIG.serverEndpoint + '?nick=' + encodeURIComponent(nick);
+    const url = CONFIG.serverEndpoint + '?action=player&nick=' + encodeURIComponent(nick);
     const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) return null;
     const data = await res.json();
@@ -1046,15 +1192,21 @@ async function syncPlayerToServer(checkpoint, overrides = {}) {
   if (!S.nick || !serverSyncEnabled()) return false;
   const state = makeProgressSnapshot(overrides);
   const payload = {
+    action: 'save_player',
     nick: S.nick,
     checkpoint: checkpoint || 'progress',
     state,
     sentAt: Date.now(),
   };
   try {
+    // Content-Type: text/plain — принципиально важно для Apps Script: запрос с
+    // application/json — это "непростой" CORS-запрос, браузер шлёт перед ним
+    // preflight OPTIONS, а Apps Script не умеет на него правильно отвечать
+    // (запрос молча падает). text/plain не требует preflight; тело всё равно
+    // содержит JSON — Code.gs сам парсит e.postData.contents как JSON.
     const res = await fetch(CONFIG.serverEndpoint, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(payload),
       cache: 'no-store',
     });
@@ -1086,48 +1238,8 @@ function digits(v) { return (v || '').toString().replace(/\D/g, ''); }
 /* =======================================================================
    СПИСКИ ОТВЕТОВ
    ======================================================================= */
-const SPORTS = [
-  'шахматы', 'спортивная гимнастика', 'гимнастика', 'айкидо',
-  'стрельба из лука', 'стрельба из ружья', 'стрельба', 'футбол', 'флорбол',
-  'хоккей', 'фигурное катание', 'школьный парламент', 'парламент',
-  'школьный театр', 'театр', 'аниматор', 'теннис', 'плавание', 'брейкданс',
-  'брейк данс', 'пейнтбол', 'лазертаг', 'лазер таг', 'настольный теннис',
-  'рисование', 'программирование', 'сценическая речь', 'актерское мастерство',
-  'фотография', 'видеосъемка', 'фортепиано', 'вокал', 'химия', 'вышивка',
-];
-
-const GAMES = [
-  ['gta5', 'gtav', 'гта5', 'гтав', 'grandtheftauto5', 'grandtheftautov'],
-  ['nierautomata', 'nier', 'ниерautomata', 'ньеравтомата'],
-  ['geometrydash', 'геометридеш'],
-  ['teamfortress2', 'tf2', 'тимфортресс2'],
-  ['cyberpunk2077', 'cyberpunk', 'киберпанк2077', 'киберпанк'],
-  ['xcom2', 'икском2'],
-  ['ageofmythologyretold', 'ageofmythology', 'aom', 'aomretold'],
-  ['outerwilds', 'аутервилдс'],
-  ['omori', 'омори'],
-  ['inscryption', 'инскрипшн'],
-  ['terraria', 'террария'],
-  ['zenlesszonezero', 'zzz', 'зенлесс'],
-  ['starcraft2', 'старкрафт2', 'sc2'],
-  ['helldivers2', 'хеллдайверс2', 'хелдайверс2'],
-  ['minecraft', 'майнкрафт', 'майн'],
-  ['ddlc', 'ddlcplus', 'dokidokiliteratureclub', 'dokidokiliteratureclubplus'],
-  ['beatsaber', 'битсейбер'],
-  ['prey', 'прей'],
-  ['slimerancher2', 'слаймранчер2'],
-  ['undertale', 'андертейл'],
-  ['persona5royal', 'persona5', 'персона5'],
-];
-
-function matchGame(value) {
-  const t = tight(value);
-  if (!t) return null;
-  for (let i = 0; i < GAMES.length; i++) {
-    if (GAMES[i].includes(t)) return i;
-  }
-  return null;
-}
+function matchSport(value) { return bankMatchGroup('v1', 6, value); }
+function matchGame(value) { return bankMatchGroup('v1', 11, value); }
 
 /* =======================================================================
    ФРАЗЫ
@@ -1200,33 +1312,33 @@ const QUESTIONS = [
     n: 1, kind: 'text',
     text: 'Когда родился Клим?',
     hint: 'Введи дату в формате ДД.ММ.ГГГГ.',
-    check: v => ['04112006', '4112006', '041106', '41106'].includes(digits(v)),
-    okHtml: 'Правильно! Ответ: <span class="stealth">14:00</span> 04.11.2006',
+    check: v => bankCheck('v1', 1, v),
+    ok: () => bankMessage('v1', 1),
   },
   {
     n: 2, kind: 'text',
     text: 'Сколько всего человек участвует в опросе?',
-    check: v => norm(v) === norm(CONFIG.participantCount),
-    ok: () => 'Правильно! Ответ: ' + CONFIG.participantCount,
+    check: v => bankCheck('v1', 2, v),
+    ok: () => bankMessage('v1', 2),
   },
   {
     n: 3, kind: 'free',
     text: 'Как давно мы знакомы?',
     hint: 'Можно написать дату, событие, место или любой другой вариант ответа.',
-    ok: () => 'Записал :)',
+    ok: () => bankMessage('v1', 3),
   },
   {
     n: 4, kind: 'text',
     text: 'Какая любимая сеть ресторанов у Клима?',
-    check: v => ['mcdonalds', 'mcdonald', 'макдоналдс', 'макдональдс', 'мак', 'макдак', 'мкдональдс'].includes(tight(v)),
-    ok: () => 'Правильно! Ответ: McDonalds',
+    check: v => bankCheck('v1', 4, v),
+    ok: () => bankMessage('v1', 4),
     extra: 'ad',
   },
   {
     n: 5, kind: 'text',
     text: 'В какой игре в Steam у Клима больше всего часов?',
-    check: v => ['terraria', 'террария'].includes(tight(v)),
-    ok: () => 'Правильно! Ответ: Terraria',
+    check: v => bankCheck('v1', 5, v),
+    ok: () => bankMessage('v1', 5),
   },
   {
     n: 6, kind: 'sports',
@@ -1236,7 +1348,7 @@ const QUESTIONS = [
   {
     n: 7, kind: 'free',
     text: 'Как ты думаешь, какая сейчас цель у Клима?',
-    ok: () => 'Спасибо за ответ :)',
+    ok: () => bankMessage('v1', 7),
   },
   {
     n: 8, kind: 'clicker',
@@ -1246,11 +1358,8 @@ const QUESTIONS = [
     n: 9, kind: 'text',
     text: 'Какие языки программирования знает Клим?',
     hint: 'Можно указать один или несколько.',
-    check: v => {
-      const t = tight(v);
-      return ['python', 'пайтон', 'питон', 'scratch', 'скретч', 'java', 'джава', 'ява', 'c++', 'с++', 'cpp', 'си++'].some(l => t.includes(tight(l)));
-    },
-    okHtml: 'Правильно! Варианты ответа: PYTHON, Scratch, Java, C++',
+    check: v => bankCheck('v1', 9, v),
+    ok: () => bankMessage('v1', 9),
   },
   {
     n: 10, kind: 'confirm',
@@ -1264,56 +1373,54 @@ const QUESTIONS = [
   {
     n: 12, kind: 'yesno',
     text: 'Умеет ли Клим готовить?',
-    right: 'да',
     extra: 'cooking',
   },
   {
     n: 13, kind: 'text',
     text: 'Какой любимый цвет у Клима?',
-    check: v => ['фиолетовый', 'фиолетовая', 'фиолет', 'purple', 'violet'].includes(tight(v)),
-    ok: () => 'Правильно! Ответ: Фиолетовый',
+    check: v => bankCheck('v1', 13, v),
+    ok: () => bankMessage('v1', 13),
   },
   {
     n: 14, kind: 'text',
     text: 'Какое у Клима сейчас зрение?',
-    check: v => ['-2', 'минус2', '2', '-20', '-2.0'].includes(tight(v)),
-    ok: () => 'Правильно! Ответ: -2',
+    check: v => bankCheck('v1', 14, v),
+    ok: () => bankMessage('v1', 14),
   },
   {
     n: 15, kind: 'text',
     textHtml: 'Хотелось ли тебе когда-нибудь узнать своё будущее?',
     hintHtml: 'Какие испытания тебе уготованы? Какие радости идут тебе навстречу?<br><br>Попроси нашего нового телеграм-бота <strong>' + CONFIG.botName + '</strong>!<br>Просто напиши ему: <strong>«Предскажи мою судьбу»</strong>',
-    check: v => ['колесофортуны', 'колесо', 'фортуна', 'wheeloffortune'].includes(tight(v)),
-    ok: () => 'Похоже, гадалка не ошиблась! Ответ: Колесо Фортуны',
-    bad: () => 'Не похоже, что вы обратились по адресу.',
+    check: v => bankCheck('v1', 15, v),
+    ok: () => bankMessage('v1', 15),
+    bad: () => bankBadMessage('v1', 15),
   },
   {
     n: 16, kind: 'text',
     text: 'Джастин Тимберлейк — ____________, 7 июля 2006 года',
-    check: v => ['sexyback', 'сексибек', 'sexy back'].includes(tight(v)),
-    ok: () => 'Правильно! Ответ: SexyBack',
+    check: v => bankCheck('v1', 16, v),
+    ok: () => bankMessage('v1', 16),
   },
   {
     n: 17, kind: 'text',
     text: 'Какой у Клима любимый покемон?',
-    check: v => ['парас', 'paras'].includes(tight(v)),
-    ok: () => 'Правильно! Ответ: Парас',
+    check: v => bankCheck('v1', 17, v),
+    ok: () => bankMessage('v1', 17),
   },
   {
     n: 18, kind: 'haystack',
     textHtml: '<strong>Ответ находится тут ↓</strong>',
-    check: v => tight(v) === 'sparkle',
-    ok: () => 'Правильно! Ответ: Sparkle',
+    check: v => bankCheck('v1', 18, v),
+    ok: () => bankMessage('v1', 18),
   },
   {
     n: 19, kind: 'yesno',
     text: 'Ломал ли Клим когда-либо свои кости?',
-    right: 'да',
   },
   {
     n: 20, kind: 'free',
     text: 'Понравился ли тебе опрос? Напиши комментарий :)',
-    ok: () => 'Спасибо за комментарий!',
+    ok: () => bankMessage('v1', 20),
   },
 ];
 
@@ -1325,37 +1432,33 @@ const V2_QUESTIONS = [
     n: 1, kind: 'text',
     text: 'Протокол',
     hint: 'Ну эта... светяшка... она разбирается в них лучше меня.',
-    check: v => tight(v) === 'tp316',
-    ok: 'Верно! Ответ: TP-316',
+    check: v => bankCheck('v2', 1, v),
+    ok: () => bankMessage('v2', 1),
   },
   {
     n: 2, kind: 'text',
     text: '1  4',
-    check: v => tight(v) === 'truegamer316',
-    ok: 'Верно! Ответ: TrueGamer316',
+    check: v => bankCheck('v2', 2, v),
+    ok: () => bankMessage('v2', 2),
   },
   {
     n: 3, kind: 'link',
     text: 'Между строк',
     linkUrl: 'https://docs.google.com/document/d/1XSGMq_UgqxJL9iZfA4tNoegyWMtPbapUyo06Di3uNN4/edit?usp=sharing',
-    check: v => tight(v) === 'повод',
-    ok: 'Верно! Ответ: Повод',
+    check: v => bankCheck('v2', 3, v),
+    ok: () => bankMessage('v2', 3),
   },
   {
     n: 4, kind: 'text',
     text: '316',
-    check: v => [
-      'компьютерныеигры', 'фиолетовый', 'друзья',
-      'компьютерныеигрыфиолетовыйдрузья',
-      '3компьютерныеигры1фиолетовый6друзья',
-    ].includes(tight(v)),
-    ok: 'Верно!',
+    check: v => bankCheck('v2', 4, v),
+    ok: () => bankMessage('v2', 4),
   },
   {
     n: 5, kind: 'countdown',
     text: 'Ты уже знаешь, что делать',
-    check: v => ['спасибо', 'спасибо!'].includes(tight(v)),
-    ok: 'Спасибо тебе. Правда.',
+    check: v => bankCheck('v2', 5, v),
+    ok: () => bankMessage('v2', 5),
   },
 ];
 
@@ -1369,14 +1472,83 @@ const V3_QUESTIONS = [
   'Какой момент нашей дружбы ты надеешься однажды вспомнить и улыбнуться?',
 ];
 
-function friendMessage(nick) {
+const FRIEND_MESSAGE_CACHE = new Map();
+
+async function loadFriendMessage(nick) {
   const key = tight(nick);
-  return CONFIG.friendMessages[key] || CONFIG.friendMessages.__default__;
+  if (!key || !serverSyncEnabled()) return CONFIG.defaultFriendMessage;
+  if (FRIEND_MESSAGE_CACHE.has(key)) return FRIEND_MESSAGE_CACHE.get(key);
+
+  const request = fetch(
+    CONFIG.serverEndpoint + '?action=friend_message&nick=' + encodeURIComponent(nick),
+    { cache: 'no-store' }
+  )
+    .then(res => {
+      if (!res.ok) throw new Error('Friend message request failed');
+      return res.json();
+    })
+    .then(data => data && typeof data.message === 'string' && data.message.trim()
+      ? data.message
+      : CONFIG.defaultFriendMessage)
+    .catch(error => {
+      console.error('Friend message load failed:', error);
+      return CONFIG.defaultFriendMessage;
+    });
+
+  FRIEND_MESSAGE_CACHE.set(key, request);
+  return request;
 }
 
-// Заглушка до серверной версии — см. комментарий у CONFIG.v2ReachedStats
+// Реальные цифры "дошли до вопроса" — тянутся из Google Таблицы (лист Players,
+// вкладка со всеми игроками) через ?action=stats. Пока запрос не пришёл или
+// бэкенд недоступен — используем статичную заглушку CONFIG.v2ReachedStats.
+let LIVE_V2_STATS = null;
+
+async function refreshV2Stats() {
+  if (!serverSyncEnabled()) return;
+  try {
+    const res = await fetch(
+      CONFIG.serverEndpoint + '?action=stats&nick=' + encodeURIComponent(S.nick || ''),
+      { cache: 'no-store' }
+    );
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data.reached) {
+      LIVE_V2_STATS = data;
+      if (S.screen === 'v2quiz') render();
+    }
+  } catch (e) {
+    /* нет сети/бэкенда — остаёмся на заглушке */
+  }
+}
+
 function reachedCount(n) {
-  return { reached: CONFIG.v2ReachedStats[n] || 0, total: Number(CONFIG.participantCount) || 0 };
+  // Пока сервер ещё не записал текущего игрока в vII, учитываем его локально.
+  // После синхронизации `currentIncluded` не даст посчитать его второй раз.
+  const addCurrentPlayer = Boolean(S.nick) &&
+    (!LIVE_V2_STATS || !LIVE_V2_STATS.currentIncluded);
+
+  if (LIVE_V2_STATS) {
+    return {
+      reached: (LIVE_V2_STATS.reached[n] || 0) + (addCurrentPlayer ? 1 : 0),
+      total: (LIVE_V2_STATS.total || 0) + (addCurrentPlayer ? 1 : 0),
+    };
+  }
+  return addCurrentPlayer ? { reached: 1, total: 1 } : { reached: 0, total: 0 };
+}
+
+// Для будущего вопроса "Преодолеватель": лист Challenges в той же таблице,
+// где ты вручную отмечаешь TRUE в колонке confirmed по мере подтверждения
+// присланных видео. Возвращает {items, confirmedCount, total} или null.
+async function fetchChallengeProgress() {
+  if (!serverSyncEnabled()) return null;
+  try {
+    const res = await fetch(CONFIG.serverEndpoint + '?action=challenges', { cache: 'no-store' });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
 }
 
 async function sendForReview(payload) {
@@ -1852,17 +2024,34 @@ function render() {
    ОТКРЫТИЕ ВЕРСИИ II
    Код можно ввести в ЛЮБОЕ поле сайта, кроме поля с ником.
    ======================================================================= */
+function handleSecretCodeValue(value) {
+  const kind = secretCodeType(value);
+  if (kind === 'debug') {
+    activateDebugMode();
+    return;
+  }
+  if (!S.unlocked && kind === 'v2') {
+    triggerV2Unlock();
+  }
+}
+
 document.addEventListener('input', (e) => {
   const t = e.target;
   if (!t || (t.tagName !== 'INPUT' && t.tagName !== 'TEXTAREA')) return;
   if (t.dataset && t.dataset.nickField) return;
+
   const v = t.value.trim();
-  if (v === CONFIG.debugCode) {
-    activateDebugMode();
+  if (QUESTION_BANK) {
+    handleSecretCodeValue(v);
     return;
   }
-  if (!S.unlocked && v === CONFIG.v2Code) {
-    triggerV2Unlock();
+
+  // Если игрок успел ввести код во время загрузки Answer Bank,
+  // проверим текущее значение сразу после загрузки.
+  if (v.length >= 8) {
+    void loadQuestionBank().then(() => {
+      if (t.isConnected && t.value.trim() === v) handleSecretCodeValue(v);
+    });
   }
 });
 
@@ -1937,7 +2126,7 @@ function triggerV2Unlock() {
     playV2UnlockSfx('crack3');
   
     setTimeout(() => {
-      burst('v2-shake-large', 0, 20, 28, 520, 'v2-catastrophe');
+      burst('v2-shake-large', 0, 12, 24, 420, 'v2-catastrophe');
     }, 220);
   }, 3150));
 
@@ -1981,7 +2170,7 @@ function triggerV2Unlock() {
       const rotation = (Math.random() * 2 - 1) * 9;
 
       copy.style.transform = 'translate3d(0,0,0) rotate(0deg) scale(1)';
-      copy.style.filter = 'blur(0) brightness(1)';
+      copy.style.opacity = '1';
       fallLayer.appendChild(copy);
       falling.push({ copy, rect, vx, vy0, gravity, delay, rotation, startX: rect.left, startY: rect.top, started: false, startTime: 0 });
       original.style.visibility = 'hidden';
@@ -2010,7 +2199,7 @@ function triggerV2Unlock() {
         const rotation = item.rotation * Math.min(1, t / 1.5) + (item.vx < 0 ? -1 : 1) * 2.5 * t;
 
         item.copy.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0) rotate(${rotation.toFixed(2)}deg) scale(${(1 - Math.min(.1, t * .025)).toFixed(3)})`;
-        item.copy.style.filter = `blur(${Math.min(3, t * 0.9).toFixed(2)}px) brightness(${Math.max(.68, 1 - t * .14).toFixed(3)})`;
+        item.copy.style.opacity = Math.max(.72, 1 - t * .12).toFixed(3);
 
         const stillVisible = item.startY + y < window.innerHeight + 500;
         if (stillVisible) active = true;
@@ -2315,6 +2504,12 @@ function renderIntro() {
     btn.disabled = true;
     note.textContent = 'Синхронизация с сервером…';
 
+    if (!await loadQuestionBank()) {
+      note.textContent = 'Не удалось загрузить данные квеста. Проверь подключение к серверу.';
+      btn.disabled = false;
+      return;
+    }
+
     const localSaved = loadProgress(v);
     const serverSaved = await loadServerProgress(v);
 
@@ -2446,17 +2641,20 @@ function buildText(q, body, card) {
   function submit() {
     const v = input.value;
     st.value = v;
+    let correct = true;
+
     if (free) {
       if (!v.trim()) return;
       st.lastCorrect = true;
       st.passed = true;
       SFX.correctV1();
     } else {
-      const correct = !!q.check(v);
+      correct = !!q.check(v);
       st.lastCorrect = correct;
       if (correct) { st.passed = true; SFX.correctV1(); }
       else SFX.wrongV1();
     }
+
     if (q.extra === 'ad' && !st.adUnlocked) {
       st.adUnlocked = true;
       mountAd(card, st);
@@ -2464,6 +2662,7 @@ function buildText(q, body, card) {
     if (!row.contains(nextBtn)) row.appendChild(nextBtn);
     showVerdict();
     saveProgress();
+    void recordV1Answer(q.n, v, correct, st.passed);
   }
 
   const nextBtn = nextButton();
@@ -2476,8 +2675,17 @@ function buildText(q, body, card) {
 /* ---------- Фейковая реклама (вопрос 4) ---------- */
 function mountAd(card, st) {
   if (card.querySelector('.ad')) return;
-  const ad = el('div', 'ad', 'M<span>McDonalds</span>I\'m lovin\' it!');
-  ad.innerHTML = '<span>McDonalds</span>I\'m lovin\' it!';
+
+  const adData = bankData('v1', 4);
+  const brand = String(adData.adBrand || '');
+  const tagline = String(adData.adTagline || '');
+
+  const ad = el('div', 'ad');
+  const brandEl = el('span');
+  brandEl.textContent = brand;
+  ad.appendChild(brandEl);
+  ad.appendChild(document.createTextNode(tagline));
+
   ad.addEventListener('click', () => {
     st.codeShown = 'bigmak = 3 + 2 * 2';
     saveProgress();
@@ -2496,9 +2704,11 @@ function buildYesNo(q, body) {
     const b = el('button', st.value === opt ? 'primary' : 'ghost', opt === 'да' ? 'Да' : 'Нет');
     b.addEventListener('click', () => {
       st.value = opt;
-      st.lastCorrect = opt === q.right;
+      st.lastCorrect = bankCheck('v1', q.n, opt);
       if (st.lastCorrect) { st.passed = true; SFX.correctV1(); }
       else SFX.wrongV1();
+      saveProgress();
+      void recordV1Answer(q.n, opt, st.lastCorrect, st.passed);
       render();
     });
     row.appendChild(b);
@@ -2565,7 +2775,6 @@ function buildSports(q, body) {
       out.appendChild(v);
     }
     if (st.found.length >= CONFIG.sportsTarget) {
-      out.appendChild(verdict('ok', 'Ого. Похоже, ты знаешь обо мне довольно много.'));
       out.appendChild(el('div', 'codebox', 'diversity = bigmak ** 2 - 5'));
     }
     chips.innerHTML = '';
@@ -2577,15 +2786,17 @@ function buildSports(q, body) {
   function guess() {
     const v = input.value.trim();
     if (!v) return;
-    const n = norm(v);
-    const isRight = SPORTS.includes(n);
-    if (isRight && !st.found.includes(n)) {
-      st.found.push(n);
+    const matchId = matchSport(v);
+    const isRight = matchId !== null;
+    const isNew = isRight && !st.found.includes(matchId);
+
+    if (isNew) {
+      st.found.push(matchId);
       st.passed = true;
       st.lastOk = true;
       SFX.correctV1();
       st.lastMsg = st.found.length >= CONFIG.sportsTarget
-        ? 'Верно!'
+        ? bankMessage('v1', 6)
         : SPORTS_YES[(st.found.length - 1) % SPORTS_YES.length];
     } else if (isRight) {
       st.lastOk = true;
@@ -2598,6 +2809,10 @@ function buildSports(q, body) {
     st.log.push({ text: v, ok: isRight });
     input.value = '';
     saveProgress();
+    void recordV1Answer(q.n, v, isRight, st.passed, {
+      matchId: matchId,
+      newMatch: isNew,
+    });
     paint();
     input.focus();
   }
@@ -2656,20 +2871,23 @@ function buildGames(q, body) {
     const v = input.value.trim();
     if (!v) return;
     const idx = matchGame(v);
-    if (idx !== null && !st.found.includes(idx)) {
+    const isRight = idx !== null;
+    const isNew = isRight && !st.found.includes(idx);
+
+    if (isNew) {
       st.found.push(idx);
       SFX.correctV1();
       const left = CONFIG.gamesTarget - st.found.length;
       if (st.found.length < CONFIG.gamesTarget) {
         st.lastMsg = 'Правильно! Назови ещё ' + left;
       } else if (st.found.length === CONFIG.gamesTarget) {
-        st.lastMsg = 'Правильно! Это уже пять :)';
+        st.lastMsg = bankMessage('v1', 11);
         st.passed = true;
       } else {
         st.lastMsg = 'Ещё одна? Круто!';
       }
       st.lastOk = true;
-    } else if (idx !== null) {
+    } else if (isRight) {
       st.lastOk = true;
       st.lastMsg = 'Эту ты уже называл :)';
     } else {
@@ -2677,11 +2895,15 @@ function buildGames(q, body) {
       st.lastMsg = 'Нет, не угадал.';
       SFX.wrongV1();
     }
-    st.log.push({ text: v, ok: idx !== null });
+    st.log.push({ text: v, ok: isRight });
     // После первой попытки вопрос можно пропустить независимо от правильности ответа.
     if (st.log.length === 1) st.passed = true;
     input.value = '';
     saveProgress();
+    void recordV1Answer(q.n, v, isRight, st.passed, {
+      matchId: idx,
+      newMatch: isNew,
+    });
     paint();
     input.focus();
   }
@@ -2800,6 +3022,7 @@ function buildClicker(q, body) {
     st.attempts = (st.attempts || 0) + clicks;
     if (clicks > 0) st.passed = true;
     saveProgress();
+    void recordV1Answer(q.n, clicks, clicks > 0, st.passed, { clicks: clicks });
     render();
   }
 
@@ -2857,6 +3080,7 @@ function buildConfirm(q, body) {
   const yes = el('button', 'primary', 'Да');
   yes.addEventListener('click', () => {
     st.step = step + 1;
+    saveProgress();
     render();
   });
   const no = el('button', 'ghost', 'Нет');
@@ -2868,6 +3092,7 @@ function buildConfirm(q, body) {
     } else {
       st.failMsg = 'Тебе не хватает решительности!';
     }
+    saveProgress();
     render();
   });
   row.appendChild(yes);
@@ -2918,9 +3143,14 @@ function buildHaystack(q, body) {
     hay.appendChild(s);
   }
 
-  // самый скрытый уровень для ответа и кода
-  place('Sparkle', sparkleCell, { color: 'rgba(47,32,56,0.011)', size: '0.85rem', correct: true });
-  place('sparxie = hanged_man - teto', sparxieCell, { color: 'rgba(47,32,56,0.012)', size: '0.7rem', mono: true, correct: true });
+  // Ответ и скрытый фрагмент приходят из Answer Bank.
+  const hidden = bankData('v1', 18);
+  place(String(hidden.hiddenTarget || ''), sparkleCell, {
+    color: 'rgba(47,32,56,0.011)', size: '0.85rem', correct: true
+  });
+  place(String(hidden.hiddenCode || ''), sparxieCell, {
+    color: 'rgba(47,32,56,0.012)', size: '0.7rem', mono: true, correct: true
+  });
 
   let ti = 0;
   cells.forEach(cell => {
@@ -2963,6 +3193,7 @@ function buildHaystack(q, body) {
     if (!row.contains(nextBtn)) row.appendChild(nextBtn);
     showVerdict();
     saveProgress();
+    void recordV1Answer(q.n, input.value, st.lastCorrect, st.passed);
   }
 
   answerBtn.addEventListener('click', submit);
@@ -3025,9 +3256,13 @@ function v2NextButton() {
   btn.addEventListener('click', () => {
     if (S.v2Index < V2_QUESTIONS.length - 1) {
       S.v2Index += 1;
+      saveProgress();
+      void syncPlayerToServer('v2-navigation', { screen: 'v2quiz' });
       render();
     } else {
       S.screen = 'v3transition';
+      saveProgress();
+      void syncPlayerToServer('v2-complete', { screen: 'v3transition' });
       render();
     }
   });
@@ -3035,6 +3270,17 @@ function v2NextButton() {
 }
 
 function renderV2Question() {
+  if (!QUESTION_BANK) {
+    const card = el('div', 'card locked-box');
+    addHudCorners(card);
+    card.appendChild(el('p', 'big', QUESTION_BANK_FAILED
+      ? 'Не удалось загрузить данные испытаний'
+      : 'Синхронизация данных испытаний…'));
+    card.appendChild(el('p', 'hint', 'Обнови страницу и попробуй снова.'));
+    app.appendChild(card);
+    return;
+  }
+
   const q = V2_QUESTIONS[S.v2Index];
   const openAt = new Date(CONFIG.v2Dates[q.n]);
 
@@ -3134,7 +3380,7 @@ function buildV2Text(q, body) {
   function paint() {
     out.innerHTML = '';
     if (st.lastCorrect === undefined) return;
-    out.appendChild(st.lastCorrect ? verdict('ok', q.ok) : verdict('bad', 'Неправильно! Попробуй ещё раз.'));
+    out.appendChild(st.lastCorrect ? verdict('ok', q.ok()) : verdict('bad', 'Неправильно! Попробуй ещё раз.'));
     if (st.passed && !row.contains(nb)) row.appendChild(nb);
   }
 
@@ -3233,7 +3479,7 @@ function buildV2Countdown(q, body) {
   function paintVerdict() {
     out.innerHTML = '';
     if (st.lastCorrect === undefined) return;
-    out.appendChild(st.lastCorrect ? verdict('ok', q.ok) : verdict('bad', 'Неправильно! Попробуй ещё раз.'));
+    out.appendChild(st.lastCorrect ? verdict('ok', q.ok()) : verdict('bad', 'Неправильно! Попробуй ещё раз.'));
   }
 
   function submit() {
@@ -3406,7 +3652,8 @@ function launchSnake(q, st) {
     msg.textContent = 'Игра окончена. Яблок: ' + apples + '. Рекорд: ' + st.bestApples;
     overlay.appendChild(msg);
     if (newRecord) {
-      const recordMsg = el('div', 'msg', 'ПОЗДРАВЛЯЕМ! Новый рекорд! TrueGamer316: ' + st.bestApples);
+      const recordData = bankData('v2', 2);
+      const recordMsg = el('div', 'msg', String(recordData.recordPrefix || '') + String(recordData.recordLabel || '') + ': ' + st.bestApples);
       recordMsg.style.color = '#8fd19e';
       recordMsg.style.marginTop = '-4px';
       recordMsg.style.fontSize = '1.02rem';
@@ -3503,14 +3750,22 @@ function renderV3Question() {
 
 function renderV3Final() {
   const wrap = el('div', 'v3-final-wrap');
-  const box = el('div', 'v3-final-msg', friendMessage(S.nick));
+  const box = el('div', 'v3-final-msg', CONFIG.friendMessageLoadingText);
   wrap.appendChild(box);
 
   startV3Music();
 
   app.appendChild(wrap);
+
+  void loadFriendMessage(S.nick).then(message => {
+    if (S.screen === 'v3final' && box.isConnected) box.textContent = message;
+  });
 }
+void loadQuestionBank().then(() => {
+  if (S.screen !== 'intro' && !QUESTION_BANK) render();
+});
 syncTrustedTime();
+refreshV2Stats();
 render();
 </script>
 </body>
