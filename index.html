@@ -6,6 +6,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Опросик в честь 20-летия</title>
+<link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Nunito:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -229,6 +230,21 @@
   }
   .final-secret:hover { color: var(--ink-soft); }
 
+  .final-screen-center {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+  }
+
+  .final-screen-center .card {
+    width: min(620px, 100%);
+  }
+
   .switchline { margin-top: 20px; font-size: .84rem; color: var(--ink-soft); text-align: center; }
   .switchline button { background: none; color: var(--accent); padding: 4px 6px; text-decoration: underline; font-size: .84rem; }
 
@@ -299,15 +315,14 @@
     80% { transform: translate(-5px,-4px) rotate(-.16deg); }
   }
   @keyframes v2ShakeLarge {
-    /* filter на body заставляет перерисовывать страницу каждый кадр. */
-    0%,100% { transform: translate3d(0,0,0) rotate(0) scale(1); }
-    10% { transform: translate3d(-12px,7px,0) rotate(-.5deg) scale(1.002); }
-    22% { transform: translate3d(10px,-9px,0) rotate(.55deg) scale(.998); }
-    34% { transform: translate3d(-15px,4px,0) rotate(-.58deg) scale(1.003); }
-    46% { transform: translate3d(14px,10px,0) rotate(.52deg) scale(.998); }
-    58% { transform: translate3d(-11px,-8px,0) rotate(-.48deg) scale(1.004); }
-    70% { transform: translate3d(16px,5px,0) rotate(.6deg) scale(.997); }
-    82% { transform: translate3d(-9px,8px,0) rotate(-.42deg) scale(1.003); }
+    0%,100% { transform: translate(0,0) rotate(0) scale(1); filter: none; }
+    10% { transform: translate(-12px,7px) rotate(-.5deg) scale(1.002); filter: contrast(1.08); }
+    22% { transform: translate(10px,-9px) rotate(.55deg) scale(.998); }
+    34% { transform: translate(-15px,4px) rotate(-.58deg) scale(1.003); filter: saturate(1.35); }
+    46% { transform: translate(14px,10px) rotate(.52deg) scale(.998); }
+    58% { transform: translate(-11px,-8px) rotate(-.48deg) scale(1.004); filter: contrast(1.18); }
+    70% { transform: translate(16px,5px) rotate(.6deg) scale(.997); }
+    82% { transform: translate(-9px,8px) rotate(-.42deg) scale(1.003); filter: saturate(1.5) contrast(1.1); }
   }
   body.v2-shake-small { animation: v2ShakeSmall .48s cubic-bezier(.36,.07,.19,.97) 1; }
   body.v2-shake-medium { animation: v2ShakeMedium .72s cubic-bezier(.36,.07,.19,.97) 1; }
@@ -320,8 +335,7 @@
   body.v2-catastrophe::after {
     content: ''; position: fixed; inset: 0; z-index: 54; pointer-events: none;
     background: repeating-linear-gradient(0deg, transparent 0 7px, rgba(255,255,255,.055) 7px 9px);
-    /* Отказ от смешивания с целой страницей — критично для мобильных GPU. */
-    opacity: .35;
+    mix-blend-mode: screen;
     animation: v2ScanBurst .18s steps(2,end) 6;
   }
   @keyframes v2Catastrophe {
@@ -344,17 +358,17 @@
     opacity: 0;
     animation-fill-mode: forwards;
   }
-  body.v2-reveal-seq .hud-ticker { animation: v2UiIn .9s cubic-bezier(.16,1,.3,1) 2.7s forwards !important; }
-  body.v2-reveal-seq .hud-telemetry { animation: v2TelemetryIn 1.1s cubic-bezier(.16,1,.3,1) 3.25s forwards !important; }
-  body.v2-reveal-seq .hud-wave { animation: v2WaveIn 1.2s cubic-bezier(.16,1,.3,1) 3.75s forwards !important; }
-  body.v2-reveal-seq .version-toggle { animation: v2UiIn .95s cubic-bezier(.16,1,.3,1) 4.25s forwards !important; }
-  body.v2-reveal-seq .debug-fab { animation: v2UiIn .95s cubic-bezier(.16,1,.3,1) 4.65s forwards !important; }
-  body.v2-reveal-seq .topbar { animation: v2TopbarIn 1.05s cubic-bezier(.16,1,.3,1) 5.05s forwards !important; }
-  body.v2-reveal-seq .card { animation: v2CardIn 1.35s cubic-bezier(.16,1,.3,1) 5.65s forwards !important; }
-  body.v2-reveal-seq .global-timer { animation: v2UiIn 1s cubic-bezier(.16,1,.3,1) 6.35s forwards !important; }
-  body.v2-reveal-seq .card h1 { opacity: 0; animation: v2TextIn .9s cubic-bezier(.16,1,.3,1) 6.75s forwards !important; }
-  body.v2-reveal-seq .card p { opacity: 0; animation: v2TextIn .85s cubic-bezier(.16,1,.3,1) 7.2s forwards !important; }
-  body.v2-reveal-seq .card button { opacity: 0; animation: v2ButtonIn 1s cubic-bezier(.16,1,.3,1) 7.75s forwards !important; }
+  body.v2-reveal-seq .hud-ticker { animation: v2UiIn .9s cubic-bezier(.16,1,.3,1) 7.2s forwards !important; }
+  body.v2-reveal-seq .hud-telemetry { animation: v2TelemetryIn 1.1s cubic-bezier(.16,1,.3,1) 7.75s forwards !important; }
+  body.v2-reveal-seq .hud-wave { animation: v2WaveIn 1.2s cubic-bezier(.16,1,.3,1) 8.25s forwards !important; }
+  body.v2-reveal-seq .version-toggle { animation: v2UiIn .95s cubic-bezier(.16,1,.3,1) 8.75s forwards !important; }
+  body.v2-reveal-seq .debug-fab { animation: v2UiIn .95s cubic-bezier(.16,1,.3,1) 9.15s forwards !important; }
+  body.v2-reveal-seq .topbar { animation: v2TopbarIn 1.05s cubic-bezier(.16,1,.3,1) 9.55s forwards !important; }
+  body.v2-reveal-seq .card { animation: v2CardIn 1.35s cubic-bezier(.16,1,.3,1) 10.15s forwards !important; }
+  body.v2-reveal-seq .global-timer { animation: v2UiIn 1s cubic-bezier(.16,1,.3,1) 10.85s forwards !important; }
+  body.v2-reveal-seq .card h1 { opacity: 0; animation: v2TextIn .9s cubic-bezier(.16,1,.3,1) 11.25s forwards !important; }
+  body.v2-reveal-seq .card p { opacity: 0; animation: v2TextIn .85s cubic-bezier(.16,1,.3,1) 11.7s forwards !important; }
+  body.v2-reveal-seq .card button { opacity: 0; animation: v2ButtonIn 1s cubic-bezier(.16,1,.3,1) 12.25s forwards !important; }
   /* После кинематографичного появления не запускаем базовые анимации повторно при снятии v2-reveal-seq. */
   body.v2-reveal-done .hud-ticker,
   body.v2-reveal-done .hud-telemetry,
@@ -443,8 +457,7 @@
     overflow: hidden;
   }
   .v1-falling-copy {
-    /* Падение идёт на compositor: фильтры крупных копий интерфейса сильно тормозили. */
-    will-change: transform, opacity;
+    will-change: transform, opacity, filter;
     contain: layout style paint;
     transform-origin: 50% 50%;
     pointer-events: none;
@@ -670,6 +683,96 @@
   }
   .global-timer span { color: var(--accent); font-weight: 700; display: inline-block; }
 
+  /* ===================== ПРЕОДОЛЕВАТЕЛЬ — выпадающая панель Версии II ===================== */
+  .challenge-drawer {
+    position: fixed;
+    top: 64px;
+    right: 14px;
+    left: auto;
+    transform: none;
+    width: min(390px, calc(100vw - 28px));
+    z-index: 27;
+    font-family: var(--body);
+    color: var(--ink);
+  }
+  .challenge-tab {
+    width: fit-content;
+    min-width: 210px;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 14px;
+    border-radius: 0 0 12px 12px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    box-shadow: 0 8px 20px -14px rgba(0,0,0,.65);
+    cursor: pointer;
+    font-size: .78rem;
+    letter-spacing: .02em;
+  }
+  .challenge-tab strong { color: var(--accent); }
+  .challenge-tab .challenge-arrow {
+    font-size: .75rem;
+    transition: transform .22s ease;
+  }
+  .challenge-drawer.open .challenge-tab .challenge-arrow { transform: rotate(180deg); }
+  .challenge-panel {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    background: var(--card);
+    border: 0 solid var(--line);
+    border-top: 0;
+    border-radius: 0 0 14px 14px;
+    box-shadow: 0 18px 36px -20px rgba(0,0,0,.7);
+    transition: max-height .28s ease, opacity .2s ease, border-width .2s ease;
+  }
+  .challenge-drawer.open .challenge-tab { width: 100%; }
+  .challenge-drawer.open .challenge-panel {
+    max-height: min(65vh, 560px);
+    overflow-y: auto;
+    opacity: 1;
+    border-width: 0 1px 1px;
+  }
+  .challenge-inner { padding: 12px 14px 14px; }
+  .challenge-intro { margin: 0 0 10px; color: var(--ink-soft); font-size: .8rem; line-height: 1.45; }
+  .challenge-progress {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; margin-bottom: 10px; font-size: .78rem; font-weight: 700;
+  }
+  .challenge-progress strong { color: var(--accent); }
+  .challenge-progress-bar {
+    height: 5px; flex: 1; background: var(--bg-alt); border-radius: 99px; overflow: hidden;
+  }
+  .challenge-progress-bar > div {
+    height: 100%; width: 0; background: linear-gradient(90deg, var(--gold), var(--accent));
+    transition: width .3s ease;
+  }
+  .challenge-list { display: flex; flex-direction: column; gap: 6px; }
+  .challenge-item {
+    display: grid; grid-template-columns: 22px 28px 1fr auto; gap: 8px;
+    padding: 7px 8px; border-radius: 9px; background: var(--bg);
+    font-size: .78rem; line-height: 1.4;
+  }
+  .challenge-number {
+    font-family: var(--mono); font-weight: 700; color: var(--ink-soft); text-align: center;
+  }
+  .challenge-item.done { background: var(--ok-bg); }
+  .challenge-item .mark { font-weight: 800; color: var(--ink-soft); text-align: center; }
+  .challenge-item.done .mark { color: var(--ok); }
+  .challenge-item .note { color: var(--ink-soft); font-size: .7rem; margin-top: 2px; }
+  .challenge-points { font-family: var(--mono); font-weight: 700; color: var(--accent); white-space: nowrap; text-align: right; }
+  .challenge-deadline { margin-top: 9px; color: var(--ink-soft); font-family: var(--mono); font-size: .65rem; text-align: center; }
+  .challenge-drawer.complete .challenge-tab { border-color: var(--ok); }
+  .challenge-drawer.complete .challenge-tab strong { color: var(--ok); }
+  @media (max-width: 520px) {
+    .challenge-drawer { top: 56px; right: 8px; width: calc(100vw - 16px); transform: none; }
+    .challenge-tab { min-width: 190px; font-size: .72rem; padding: 7px 11px; }
+  }
+
   /* ===================== СЛУЖЕБНАЯ ПАНЕЛЬ (код полного доступа) ===================== */
   .debug-fab {
     position: fixed; left: 14px !important; right: auto !important; bottom: 14px !important; z-index: 40;
@@ -811,6 +914,64 @@
     max-width: 34rem; font-family: var(--display); font-size: 1.4rem; line-height: 1.55;
     color: #4a3b34; background: rgba(255,255,255,.72); padding: 30px 26px; border-radius: 18px;
     box-shadow: 0 20px 50px -20px rgba(0,0,0,.35); animation: rise .8s ease;
+    position: relative; z-index: 2;
+  }
+
+  /* Плавающие окна с вопросами и моими ответами (финал версии III) */
+  .v3-float-layer { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; }
+  .v3-win {
+    position: absolute; width: min(250px, 46vw); text-align: left; pointer-events: auto; cursor: pointer;
+    background: rgba(255,255,255,.62); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,.75); border-radius: 16px; overflow: hidden;
+    box-shadow: 0 18px 40px -22px rgba(90,50,30,.5);
+    color: #4a3b34; font-size: .84rem; line-height: 1.45;
+    opacity: 0;
+    animation: v3WinIn 1s ease var(--in, 1s) forwards, var(--drift, v3WinDriftA) var(--dur, 16s) ease-in-out var(--delay, 0s) infinite;
+    will-change: transform;
+  }
+  .v3-win-bar {
+    display: flex; align-items: center; gap: 8px; padding: 7px 11px;
+    background: rgba(255,255,255,.55); border-bottom: 1px solid rgba(224,138,91,.18);
+    font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; color: #8d7669;
+  }
+  .v3-win-bar .dots { display: inline-flex; gap: 4px; }
+  .v3-win-bar .dots i { width: 7px; height: 7px; border-radius: 50%; background: #ffb6a0; display: block; }
+  .v3-win-bar .dots i:nth-child(2) { background: #ffd98a; }
+  .v3-win-bar .dots i:nth-child(3) { background: #bfdcb8; }
+  .v3-win-body { padding: 10px 13px 13px; max-height: 30vh; overflow-y: auto; }
+  .v3-win-q { margin: 0 0 8px; font-size: .78rem; color: #8d7669; font-style: italic; }
+  .v3-win-tag { display: block; margin: 0 0 3px; font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; color: #e08a5b; }
+  .v3-win-a { margin: 0; font-family: var(--display); font-size: .98rem; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .v3-win:hover, .v3-win.front { animation-play-state: running, paused; z-index: 3; background: rgba(255,255,255,.88); box-shadow: 0 24px 50px -18px rgba(90,50,30,.6); }
+  .v3-win.front .v3-win-body { max-height: 55vh; }
+
+  .v3-win.w1 { left: 4%;  top: 7%;     --drift: v3WinDriftA; --dur: 17s; --delay: -3s;  --in: .9s; }
+  .v3-win.w2 { right: 4%; top: 12%;    --drift: v3WinDriftB; --dur: 19s; --delay: -9s;  --in: 1.5s; }
+  .v3-win.w3 { left: 6%;  bottom: 8%;  --drift: v3WinDriftB; --dur: 15s; --delay: -6s;  --in: 2.1s; }
+  .v3-win.w4 { right: 5%; bottom: 10%; --drift: v3WinDriftA; --dur: 18s; --delay: -12s; --in: 2.7s; }
+  @media (max-width: 640px) {
+    .v3-win { width: min(210px, 58vw); font-size: .8rem; }
+    .v3-win.w1 { left: 3%;  top: 2%; }
+    .v3-win.w2 { right: 3%; top: 15%; }
+    .v3-win.w3 { left: 3%;  bottom: 17%; }
+    .v3-win.w4 { right: 3%; bottom: 2%; }
+    .v3-win-body { max-height: 22vh; }
+  }
+  @keyframes v3WinIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes v3WinDriftA {
+    0%, 100% { transform: translate(0, 0) rotate(-2deg); }
+    25% { transform: translate(26px, -18px) rotate(1deg); }
+    50% { transform: translate(-14px, 24px) rotate(2deg); }
+    75% { transform: translate(-28px, -8px) rotate(-1deg); }
+  }
+  @keyframes v3WinDriftB {
+    0%, 100% { transform: translate(0, 0) rotate(2deg); }
+    25% { transform: translate(-24px, 20px) rotate(-1deg); }
+    50% { transform: translate(16px, -22px) rotate(-2deg); }
+    75% { transform: translate(26px, 10px) rotate(1deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .v3-win { animation: v3WinIn .01s ease forwards !important; }
   }
 
 /* ===================== ПРЕДПОДГОТОВКА АНИМАЦИЙ ===================== */
@@ -823,6 +984,7 @@ body {
 .crack-line,
 .flash-overlay,
 .v1-fall-layer,
+.v1-falling-copy,
 .version-switch-overlay,
 .snake-overlay,
 .v3-wash {
@@ -835,31 +997,133 @@ body.v2-shake-large,
 body.v2-catastrophe,
 body.epic-shake,
 body.epic-shake-long {
-  will-change: transform, opacity;
+  will-change: transform, opacity, filter;
 }
   
+
+  /* ===================== ПРАВКИ: secret, терминал, пропуск, V3 ===================== */
+  /* В покое блок почти не виден; при наведении мыши подсвечиваются все три строки. */
+  .final-secret { color: #fbf6ee; cursor: default; word-break: break-word; }
+  .final-secret span {
+    display: block; padding: 4px 12px; border-radius: 8px;
+    border-left: 3px solid transparent; color: #fbf6ee;
+    transition: color .35s ease, background-color .35s ease, border-color .35s ease, box-shadow .35s ease;
+  }
+  .final-secret .sec-line { margin: 8px 0; padding-top: 9px; padding-bottom: 9px; }
+  .final-secret:hover span {
+    color: var(--ink-soft); background: var(--accent-soft); border-left-color: var(--accent);
+  }
+  .final-secret:hover .sec-line {
+    color: var(--accent); font-weight: 700;
+    background: linear-gradient(100deg, var(--accent-soft), rgba(224,165,46,.28), var(--accent-soft));
+    background-size: 220% 100%;
+    animation: secretShimmer 4s linear infinite, secretGlow 2.6s ease-in-out infinite;
+  }
+  @keyframes secretShimmer { to { background-position: -220% 0; } }
+  @keyframes secretGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(123,63,160,0); }
+    50% { box-shadow: 0 0 16px 2px rgba(123,63,160,.38); }
+  }
+
+  .v3-late { opacity: 0; pointer-events: none; transform: translateY(6px); transition: opacity 1.3s ease, transform 1.3s ease; }
+  .v3-late.in { opacity: 1; pointer-events: auto; transform: none; }
+
+  .v2-terminal {
+    position: fixed; right: 14px; bottom: 62px; z-index: 24;
+    width: min(330px, calc(100vw - 28px));
+    font-family: var(--mono); font-size: .68rem; line-height: 1.55;
+    color: #b79be0; background: rgba(15,10,23,.93);
+    border: 1px solid rgba(130,103,168,.45); border-radius: 8px;
+    padding: 6px 10px; pointer-events: none;
+  }
+  .v2-terminal .t-head { color: #7a5ea3; font-size: .6rem; letter-spacing: .06em; }
+  .v2-terminal .t-cur { animation: termBlink 1s steps(2, start) infinite; }
+  @keyframes termBlink { to { visibility: hidden; } }
+  .v2-terminal .t-log { display: none; margin-top: 5px; }
+  .v2-terminal.open .t-log { display: block; }
+  .v2-terminal .t-line { white-space: pre-wrap; word-break: break-word; }
+  body.v2-reveal-seq .v2-terminal { opacity: 0; animation: v2UiIn .95s cubic-bezier(.16,1,.3,1) 9.3s forwards !important; }
+  body.v2-reveal-done .v2-terminal { opacity: 1; animation: none !important; }
+  @media (max-width: 640px) { .v2-terminal { bottom: 64px; } }
+
+  .skip-quest {
+    position: fixed; left: 14px; bottom: 58px; z-index: 35;
+    padding: 7px 12px; border-radius: 99px; font-size: .72rem;
+    background: var(--card); color: var(--ink);
+    border: 1px dashed var(--accent);
+    box-shadow: 0 8px 18px -10px rgba(0,0,0,.5);
+  }
+  .skip-quest.with-debug { left: 62px; bottom: 14px; }
 </style>
 </head>
 <body>
-<div class="wrap" id="app"></div>
+<div class="wrap" id="app"><p style="text-align:center;opacity:.6;padding:40px 0;font-family:system-ui,sans-serif">Загрузка…</p></div>
 
+<noscript>
+<div style="max-width:420px;margin:60px auto;padding:24px;font-family:system-ui,sans-serif;text-align:center;color:#2f2038">
+  <h2>Нужен JavaScript</h2>
+  <p>Этот квест работает только с включённым JavaScript. Включи его в настройках браузера и обнови страницу.</p>
+</div>
+</noscript>
 <script>
-window.addEventListener('error', function (e) {
-  document.body.innerHTML =
-    '<pre style="white-space:pre-wrap;padding:30px;color:#b00020;font:16px monospace;">' +
-    'ОШИБКА JAVASCRIPT\n\n' +
-    e.message + '\n\n' +
-    (e.filename || '') + ':' + (e.lineno || '') + ':' + (e.colno || '') +
-    '</pre>';
-});
+/* Аварийные заглушки: вместо «красного экрана» показываем аккуратное окно,
+   а сам квест продолжает работать. Прогресс при этом лежит в localStorage. */
+(function () {
+  var shown = false;
+  function esc(s) { return String(s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
 
-window.addEventListener('unhandledrejection', function (e) {
-  document.body.innerHTML =
-    '<pre style="white-space:pre-wrap;padding:30px;color:#b00020;font:16px monospace;">' +
-    'ОШИБКА PROMISE\n\n' +
-    String(e.reason) +
-    '</pre>';
-});
+  window.__showFatal = function (title, details) {
+    if (shown) return;
+    shown = true;
+    var o = document.createElement('div');
+    o.setAttribute('style', 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:rgba(20,12,28,.82);display:flex;align-items:center;justify-content:center;padding:20px;font-family:system-ui,sans-serif;');
+    o.innerHTML =
+      '<div style="background:#fff;color:#2f2038;max-width:440px;width:100%;border-radius:16px;padding:24px;box-shadow:0 20px 50px rgba(0,0,0,.4);max-height:90vh;overflow:auto">' +
+      '<h2 style="margin:0 0 8px;font-size:1.25rem">' + esc(title || 'Что-то пошло не так') + '</h2>' +
+      '<p style="margin:0 0 14px;line-height:1.5;font-size:.95rem">Не переживай: твой прогресс сохранён на этом устройстве. Попробуй обновить страницу - ты продолжишь с того же места.</p>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>' +
+      (details ? '<details style="font-size:.78rem;color:#6b5a76"><summary style="cursor:pointer">Технические подробности</summary><pre style="white-space:pre-wrap;word-break:break-word;margin:8px 0 0">' + esc(details) + '</pre></details>' : '') +
+      '</div>';
+    var row = o.querySelector('div > div');
+    function mk(label, primary, fn) {
+      var b = document.createElement('button');
+      b.textContent = label;
+      b.setAttribute('style', 'border:0;border-radius:99px;padding:9px 16px;font-size:.88rem;cursor:pointer;' + (primary ? 'background:#7b3fa0;color:#fff;' : 'background:#efe2f7;color:#7b3fa0;'));
+      b.addEventListener('click', fn);
+      row.appendChild(b);
+    }
+    mk('Обновить страницу', true, function () { location.reload(); });
+    mk('Закрыть', false, function () { o.remove(); shown = false; });
+    document.body.appendChild(o);
+  };
+
+  window.__toast = function (text) {
+    var t = document.createElement('div');
+    t.textContent = text;
+    t.setAttribute('style', 'position:fixed;left:50%;bottom:70px;transform:translateX(-50%);z-index:99998;background:rgba(40,28,52,.94);color:#fff;font:13px system-ui,sans-serif;padding:9px 16px;border-radius:12px;max-width:90vw;text-align:center');
+    document.body.appendChild(t);
+    setTimeout(function () { t.remove(); }, 6000);
+  };
+
+  window.addEventListener('error', function (e) {
+    console.error('Quest error:', e.message, e.filename, e.lineno, e.colno);
+    if (!e.message || /ResizeObserver/.test(e.message)) return;
+    if (e.message === 'Script error.' && !e.lineno) return;
+    window.__showFatal('Что-то пошло не так', e.message + '\n' + (e.filename || '') + ':' + (e.lineno || '') + ':' + (e.colno || ''));
+  });
+
+  window.addEventListener('unhandledrejection', function (e) {
+    console.error('Quest promise error:', e.reason);
+    var msg = String(e.reason && e.reason.message || e.reason || '');
+    if (/Failed to fetch|NetworkError|Load failed|AbortError|aborted/i.test(msg)) return; // сеть — обрабатывается отдельно
+    window.__toast('Что-то пошло не так. Если зависло - обнови страницу, прогресс сохранён.');
+  });
+
+  // Если основной скрипт так и не дошёл до конца — показываем заглушку.
+  setTimeout(function () {
+    if (!window.__questBooted) window.__showFatal('Квест не загрузился', 'Основной скрипт не выполнился до конца. Проверь интернет и обнови страницу.');
+  }, 10000);
+})();
 </script>
   
 <script>
@@ -880,9 +1144,20 @@ const CONFIG = {
     4: '2026-11-02T00:00:00+02:00',
     5: '2026-11-04T00:00:00+02:00',
   },
+
+  // "Преодолеватель" действует с 31.10 по 04.11 включительно.
+  // Набрав нужное количество баллов за подтверждённые задания, игрок получает II-5.
+  preodolevatelStart: '2026-10-31T00:00:00+02:00',
+  preodolevatelEnd: '2026-11-05T00:00:00+02:00',
+  preodolevatelRequiredPoints: 180, // сколько баллов нужно набрать; при необходимости поменяй здесь
+  preodolevatelRefreshMs: 10000,
   
   birthdayStart: '2026-11-04T00:00:00+02:00',
   birthdayEnd: '2026-11-05T00:00:00+02:00',
+
+  // Кнопка «Пропустить квест» (сразу на версию III) появляется после этого момента
+  // (по серверному времени) либо при вводе debug-кода.
+  skipQuestFrom: '2026-11-05T00:01:00+02:00',
   
   calmMusicUrl: 'audio/MyConfession.mp3', // Версия III: положи свою музыку в audio/MyConfession.mp3 рядом с HTML
   v2ToV3SfxUrl: 'audio/verIIsfx.mp3', // Звук перехода II→III: 9-секундный файл verIIsfx.mp3
@@ -893,19 +1168,24 @@ const CONFIG = {
     collapse: 'audio/4.mp3',
     blackHum: 'audio/5.mp3',
   },
+  // Вопросы версии I, ответы на которые НЕ пишутся в таблицу (I-10 «Вы уверены?» — бесконечные «да»).
+  v1NoLogQuestions: [10],
   reviewEndpoint: '',          // legacy: внешний webhook, если понадобится позже
 
   // Бэкенд на Google Apps Script + Google Таблице (см. Code.gs).
   // Оба поля — один и тот же URL веб-приложения (заканчивается на /exec):
   // один и тот же скрипт отдаёт и время, и прогресс, различая запросы по ?action=.
-  serverEndpoint: 'https://script.google.com/macros/s/AKfycbwD5gGhNvXH_CensImeeSoIBJv0RXqLw6zzs4X5tuAtpiRVKucoVk5UHlzUyKvmQ4-A/exec',
-  timeEndpoint: 'https://script.google.com/macros/s/AKfycbwD5gGhNvXH_CensImeeSoIBJv0RXqLw6zzs4X5tuAtpiRVKucoVk5UHlzUyKvmQ4-A/exec',
+  serverEndpoint: 'https://script.google.com/macros/s/AKfycbwDUIkmCER0fyeb2m0NC8iFgBUpl8kD5bG7VxjEhBStYaO3O-x0lxEf87KtU0ACIYVC/exec',
+  timeEndpoint: 'https://script.google.com/macros/s/AKfycbwDUIkmCER0fyeb2m0NC8iFgBUpl8kD5bG7VxjEhBStYaO3O-x0lxEf87KtU0ACIYVC/exec',
 
 
-  // Текст на финальном экране, пока ответ загружается из Google Таблицы.
-  friendMessageLoadingText: 'Подожди немного…',
-  // Запасной текст: используется только при недоступном сервере или пустом листе.
-  defaultFriendMessage: 'Спасибо, что дошёл(-шла) до конца. Ты значишь для меня очень много — с днём рождения меня, и спасибо, что рядом! 💜',
+  friendMessages: {
+    // ключ — ник друга в нижнем регистре без пробелов, значение — твоё персональное сообщение
+    // '__default__' — сообщение для всех, кому не задано персональное
+    // Личные сообщения и мои ответы на вопросы III лежат в Google Таблице (лист Finale) и
+    // загружаются только перед финалом. Здесь — запасное сообщение на случай, если сервер недоступен.
+    __default__: 'Спасибо, что дошёл(-шла) до конца. Ты значишь для меня очень много - с днём рождения меня, и спасибо, что рядом! 💜',
+  },
 };
 
 /* =======================================================================
@@ -919,11 +1199,28 @@ let PERF_TIME_AT_START = null;
 let SERVER_TIME_READY = false;
 let SERVER_TIME_FAILED = false;
 
+// Apps Script бывает медленным (холодный старт), поэтому таймауты длинные.
+async function fetchWithTimeout(url, opts = {}, ms = 20000) {
+  const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  const timer = ctrl ? setTimeout(() => ctrl.abort(), ms) : null;
+  try {
+    return await fetch(url, ctrl ? { ...opts, signal: ctrl.signal } : opts);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+let TIME_RETRY = null;
+function scheduleTimeRetry() {
+  if (TIME_RETRY) return;
+  TIME_RETRY = setTimeout(() => { TIME_RETRY = null; syncTrustedTime(); }, 15000);
+}
+
 async function syncTrustedTime() {
   try {
-    const res = await fetch(CONFIG.timeEndpoint + '?action=time', {
+    const res = await fetchWithTimeout(CONFIG.timeEndpoint + '?action=time', {
       cache: 'no-store',
-    });
+    }, 20000);
 
     if (!res.ok) {
       throw new Error('Time request failed');
@@ -939,14 +1236,18 @@ async function syncTrustedTime() {
     SERVER_TIME_AT_START = serverTime;
     PERF_TIME_AT_START = performance.now();
     SERVER_TIME_READY = true;
+    SERVER_TIME_FAILED = false;
 
   } catch (e) {
     SERVER_TIME_FAILED = true;
     console.error('Trusted time sync failed:', e);
+    scheduleTimeRetry(); // пробуем снова автоматически, пока время не придёт
   }
 
   if (S.screen === 'v2quiz') {
     render();
+  } else if (typeof mountSkipButton === 'function') {
+    mountSkipButton();
   }
 }
 
@@ -984,9 +1285,13 @@ function makeProgressSnapshot(overrides = {}) {
     v2Index: S.v2Index,
     v2Answers: S.v2Answers,
     v2TotalQuestions: V2_QUESTIONS.length,
+    preodolevatelPoints: Number(S.preodolevatelPoints) || 0,
+    preodolevatelRequiredPoints: Number(CONFIG.preodolevatelRequiredPoints) || 0,
+    preodolevatelPassed: !!S.preodolevatelPassed,
     v3Index: S.v3Index,
     v3Answers: S.v3Answers,
     timerRevealed: S.timerRevealed,
+    termSeen: S.termSeen,
     updatedAt: Date.now(),
     ...overrides,
   };
@@ -999,9 +1304,12 @@ function applyProgress(saved) {
   S.unlocked = saved.unlocked || false;
   S.v2Index = saved.v2Index || 0;
   S.v2Answers = saved.v2Answers || {};
+  S.preodolevatelPoints = Number(saved.preodolevatelPoints ?? saved.preodolevatelCount) || 0;
+  S.preodolevatelPassed = !!saved.preodolevatelPassed;
   S.v3Index = saved.v3Index || 0;
   S.v3Answers = saved.v3Answers || [];
   S.timerRevealed = saved.timerRevealed || false;
+  S.termSeen = Array.isArray(saved.termSeen) ? saved.termSeen : [];
   S.screen = saved.screen || 'quiz';
   return true;
 }
@@ -1035,44 +1343,64 @@ let QUESTION_BANK = null;
 let QUESTION_BANK_FAILED = false;
 let QUESTION_BANK_LOADING = null;
 
+function isValidBank(data) {
+  return !!(data && data.v1 && data.v1['1'] && data.v2 && data.v2['1'] && data.codes && data.codes.v2Unlock);
+}
+
+/* Банк кэшируется в localStorage: у вернувшихся игроков он появляется мгновенно,
+   а свежая версия докачивается в фоне и тихо заменяет кэш. Ждать приходится
+   только при самом первом визите на устройстве. */
+const BANK_CACHE_KEY = 'quest_bank_cache_v1';
+
+function readBankCache() {
+  try {
+    const raw = localStorage.getItem(BANK_CACHE_KEY);
+    if (!raw) return null;
+    const d = JSON.parse(raw);
+    return isValidBank(d) ? d : null;
+  } catch (e) { return null; }
+}
+
+function writeBankCache(d) {
+  try { localStorage.setItem(BANK_CACHE_KEY, JSON.stringify(d)); } catch (e) {}
+}
+
+function fetchBankFromNetwork() {
+  if (QUESTION_BANK_LOADING) return QUESTION_BANK_LOADING;
+  QUESTION_BANK_LOADING = (async () => {
+    try {
+      const res = await fetchWithTimeout(CONFIG.serverEndpoint + '?action=question_bank', {
+        cache: 'no-store',
+      }, 20000);
+      if (!res.ok) throw new Error('Question bank request failed');
+      const data = await res.json();
+      if (!isValidBank(data)) throw new Error('Invalid or empty question bank');
+      QUESTION_BANK = data;
+      QUESTION_BANK_FAILED = false;
+      writeBankCache(data);
+      return true;
+    } catch (e) {
+      console.error('Question bank load failed:', e);
+      if (!QUESTION_BANK) QUESTION_BANK_FAILED = true;
+      return false;
+    } finally {
+      QUESTION_BANK_LOADING = null;
+    }
+  })();
+  return QUESTION_BANK_LOADING;
+}
+
 async function loadQuestionBank() {
   if (!serverSyncEnabled()) return false;
   if (QUESTION_BANK) return true;
-  if (QUESTION_BANK_LOADING) return QUESTION_BANK_LOADING;
-
-  QUESTION_BANK_LOADING = (async () => {
-    try {
-      const res = await fetch(CONFIG.serverEndpoint + '?action=question_bank', {
-        cache: 'no-store',
-      });
-      if (!res.ok) throw new Error('Question bank request failed');
-
-      const data = await res.json();
-      if (
-        !data ||
-        !data.v1 ||
-        !data.v1['1'] ||
-        !data.v2 ||
-        !data.v2['1'] ||
-        !data.codes ||
-        !data.codes.v2Unlock
-      ) {
-        throw new Error('Invalid or empty question bank');
-      }
-
-      QUESTION_BANK = data;
-      QUESTION_BANK_FAILED = false;
-      return true;
-    } catch (e) {
-      QUESTION_BANK_FAILED = true;
-      console.error('Question bank load failed:', e);
-      return false;
-    }
-  })();
-
-  const result = await QUESTION_BANK_LOADING;
-  QUESTION_BANK_LOADING = null;
-  return result;
+  const cached = readBankCache();
+  if (cached) {
+    QUESTION_BANK = cached;
+    QUESTION_BANK_FAILED = false;
+    void fetchBankFromNetwork(); // освежаем в фоне
+    return true;
+  }
+  return fetchBankFromNetwork();
 }
 
 function bankEntry(version, n) {
@@ -1145,26 +1473,87 @@ function bankMatchGroup(version, n, value) {
   return null;
 }
 
-async function recordV1Answer(question, answer, correct, passed, details = {}) {
-  if (!S.nick || !serverSyncEnabled()) return;
+/* ---------- Журнал ответов версии I ----------
+   Раньше каждый ответ уходил отдельным запросом (лишняя нагрузка на Apps Script).
+   Теперь ответы копятся на устройстве и уходят одним пакетом: при завершении v1,
+   при закрытии/сворачивании вкладки и при следующем заходе, если что-то осталось. */
+const V1LOG_PREFIX = 'quest_v1log_';
+const V1LOG = { nick: null, buffer: [], pending: null, inflight: false };
+
+function v1LogKey(nick) { return V1LOG_PREFIX + storeKey(nick); }
+
+function v1LogPersist() {
+  if (!V1LOG.nick) return;
   try {
-    await fetch(CONFIG.serverEndpoint, {
+    if (!V1LOG.buffer.length && !V1LOG.pending) localStorage.removeItem(v1LogKey(V1LOG.nick));
+    else localStorage.setItem(v1LogKey(V1LOG.nick), JSON.stringify({ buffer: V1LOG.buffer, pending: V1LOG.pending }));
+  } catch (e) {}
+}
+
+function v1LogLoad(nick) {
+  V1LOG.nick = nick;
+  V1LOG.buffer = [];
+  V1LOG.pending = null;
+  try {
+    const r = JSON.parse(localStorage.getItem(v1LogKey(nick)) || 'null');
+    if (r && typeof r === 'object') {
+      V1LOG.buffer = Array.isArray(r.buffer) ? r.buffer : [];
+      V1LOG.pending = r.pending && Array.isArray(r.pending.entries) ? r.pending : null;
+    }
+  } catch (e) {}
+}
+
+function recordV1Answer(question, answer, correct, passed, details = {}) {
+  if (!S.nick || !serverSyncEnabled()) return Promise.resolve();
+  const a = answer == null ? '' : String(answer);
+  if (!a) return Promise.resolve();
+  if ((CONFIG.v1NoLogQuestions || []).includes(Number(question))) return Promise.resolve();
+  if (V1LOG.nick !== S.nick) v1LogLoad(S.nick);
+  V1LOG.buffer.push({ q: Number(question), a: a });
+  v1LogPersist();
+  return Promise.resolve();
+}
+
+async function flushV1Log(keepalive) {
+  const L = V1LOG;
+  if (!L.nick || L.inflight || !serverSyncEnabled()) return;
+  if (!L.pending) {
+    if (!L.buffer.length) return;
+    // id пакета остаётся тем же при повторной отправке — сервер отбросит дубль
+    L.pending = {
+      id: L.nick + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+      entries: L.buffer,
+    };
+    L.buffer = [];
+    v1LogPersist();
+  }
+  const batch = L.pending;
+  L.inflight = true;
+  if (!keepalive) SaveBanner.saving();
+  try {
+    const res = await fetch(CONFIG.serverEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({
-        action: 'record_v1_answer',
-        nick: S.nick,
-        question: question,
-        answer: answer == null ? '' : String(answer),
-        correct: !!correct,
-        passed: !!passed,
-        details: details || {},
+        action: 'record_v1_answers',
+        nick: L.nick,
+        batchId: batch.id,
+        entries: batch.entries,
         sentAt: Date.now(),
       }),
       cache: 'no-store',
+      keepalive: !!keepalive,
     });
+    if (!res.ok) throw new Error('v1 log failed: ' + res.status);
+    const data = await res.json();
+    if (!data || data.ok !== true) throw new Error('v1 log rejected');
+    if (L.pending === batch) L.pending = null;
+    v1LogPersist();
   } catch (e) {
-    /* Журнал ответов — дополнительная статистика, квест не ломаем при сбое. */
+    /* пакет остаётся на устройстве и уйдёт при следующей попытке */
+  } finally {
+    L.inflight = false;
+    if (!keepalive && !SAVE_Q.busy) SaveBanner.done();
   }
 }
 
@@ -1175,29 +1564,171 @@ function secretCodeType(value) {
   return '';
 }
 
+// Возвращает: объект игрока | null (игрока нет на сервере) | { __error: true } (сервер не ответил).
+// Различие важно: при ошибке сети нельзя считать игрока «новым» и затирать его прогресс.
 async function loadServerProgress(nick) {
   if (!serverSyncEnabled()) return null;
   try {
     const url = CONFIG.serverEndpoint + '?action=player&nick=' + encodeURIComponent(nick);
-    const res = await fetch(url, { cache: 'no-store' });
-    if (!res.ok) return null;
+    const res = await fetchWithTimeout(url, { cache: 'no-store' }, 20000);
+    if (!res.ok) return { __error: true };
     const data = await res.json();
     return data && data.found ? data.player : null;
   } catch (e) {
-    return null;
+    return { __error: true };
   }
 }
 
-async function syncPlayerToServer(checkpoint, overrides = {}) {
-  if (!S.nick || !serverSyncEnabled()) return false;
-  const state = makeProgressSnapshot(overrides);
+/* ---------- Предзагрузка прогресса, пока игрок вводит ник ---------- */
+const PLAYER_PREFETCH = {};
+function prefetchServerProgress(nick) {
+  if (!serverSyncEnabled()) return Promise.resolve(null);
+  const key = nick.trim().toLowerCase();
+  const hit = PLAYER_PREFETCH[key];
+  if (hit && Date.now() - hit.at < 60000) return hit.p;
+  const p = loadServerProgress(nick).then(r => {
+    if (r && r.__error) delete PLAYER_PREFETCH[key]; // ошибку не кэшируем
+    return r;
+  });
+  PLAYER_PREFETCH[key] = { at: Date.now(), p };
+  return p;
+}
+
+/* ---------- Плашка «идёт сохранение» ---------- */
+// Плашку не показываем на версии III и во время заставок/переходов (раскрытие версии II,
+// переключение версий, трещины и вспышка), чтобы не ломать атмосферу. Сохранение при этом идёт
+// как обычно; если оно ещё не закончилось к концу перехода — плашка появится потом.
+function saveBannerSuppressed() {
+  const sc = S.screen;
+  if (sc === 'v3transition' || sc === 'v3quiz' || sc === 'v3final') return true;
+  const b = document.body.classList;
+  if (b.contains('v2-reveal-seq') || b.contains('version-switching') || b.contains('version-switch-in')) return true;
+  return !!document.querySelector('.crack-overlay, .flash-overlay, .version-switch-overlay');
+}
+
+const SaveBanner = (function () {
+  let node = null, showTimer = null, hideTimer = null, visible = false;
+
+  function ensure() {
+    if (node && node.isConnected) return node;
+    if (!document.getElementById('save-banner-css')) {
+      const st = document.createElement('style');
+      st.id = 'save-banner-css';
+      st.textContent = '@keyframes sbspin{to{transform:rotate(360deg)}}' +
+        '#save-banner{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:99990;' +
+        'display:flex;align-items:center;gap:9px;padding:8px 14px;border-radius:99px;' +
+        'font:13px/1.3 system-ui,sans-serif;color:#fff;background:rgba(40,28,52,.92);' +
+        'box-shadow:0 6px 20px rgba(0,0,0,.28);max-width:92vw;pointer-events:none;' +
+        'transition:opacity .25s;opacity:0}' +
+        '#save-banner.on{opacity:1}' +
+        '#save-banner.warn{background:rgba(150,70,20,.95)}' +
+        '#save-banner .sp{width:13px;height:13px;border-radius:50%;border:2px solid rgba(255,255,255,.35);' +
+        'border-top-color:#fff;animation:sbspin .8s linear infinite;flex:none}';
+      document.head.appendChild(st);
+    }
+    node = document.createElement('div');
+    node.id = 'save-banner';
+    document.body.appendChild(node);
+    return node;
+  }
+
+  function show(text, warn, spin) {
+    const n = ensure();
+    n.className = warn ? 'warn' : '';
+    n.innerHTML = (spin ? '<span class="sp"></span>' : '') + '<span></span>';
+    n.lastChild.textContent = text;
+    void n.offsetWidth;
+    n.classList.add('on');
+    visible = true;
+  }
+
+  function hide() {
+    if (node) node.classList.remove('on');
+    visible = false;
+  }
+
+  return {
+    saving() {
+      clearTimeout(hideTimer);
+      if (visible) return;
+      if (showTimer) return;
+      // быстрые сохранения не мигают — плашка появляется, только если ждать дольше ~0.7 с
+      showTimer = setTimeout(() => {
+        showTimer = null;
+        if (saveBannerSuppressed()) return;
+        show('Идёт сохранение данных, не закрывайте страницу', false, true);
+      }, 700);
+    },
+    retry() {
+      clearTimeout(showTimer); showTimer = null;
+      clearTimeout(hideTimer);
+      if (saveBannerSuppressed()) { hide(); return; }
+      show('Не удалось сохранить. Пробуем снова. Не закрывайте страницу', true, true);
+    },
+    done() {
+      clearTimeout(showTimer); showTimer = null;
+      if (!visible) return;
+      if (saveBannerSuppressed()) { hide(); return; }
+      show('Всё сохранено ✓', false, false);
+      hideTimer = setTimeout(hide, 1500);
+    },
+    // Вызывается по таймеру: прячет плашку при входе в заставку/версию III и возвращает,
+    // если сохранение всё ещё идёт после выхода из неё.
+    refresh() {
+      if (saveBannerSuppressed()) {
+        clearTimeout(showTimer); showTimer = null;
+        if (visible) hide();
+        return;
+      }
+      const working = (typeof SAVE_Q !== 'undefined' && (SAVE_Q.busy || SAVE_Q.items.length)) ||
+                      (typeof V1LOG !== 'undefined' && V1LOG.inflight);
+      if (working && !visible && !showTimer) this.saving();
+    },
+  };
+})();
+
+/* ---------- Очередь сохранений ----------
+   Квест не ждёт ответа сервера: снимок прогресса кладётся в очередь и уходит
+   в фоне, по одному, с повтором при сбое. Пока в очереди что-то есть, у
+   игрока на устройстве стоит метка «dirty» — при следующем заходе локальный
+   прогресс не будет затёрт более старой серверной копией. */
+const SAVE_Q = { items: [], busy: false, failStreak: 0 };
+let LAST_SENT_SIG = '';
+function stateSig(state) {
+  try { return JSON.stringify({ ...state, updatedAt: 0 }); } catch (e) { return String(Date.now()); }
+}
+
+function dirtyKey(nick) { return 'quest_dirty_' + storeKey(nick); }
+function markDirty(nick) { try { localStorage.setItem(dirtyKey(nick), String(Date.now())); } catch (e) {} }
+function clearDirty(nick) { try { localStorage.removeItem(dirtyKey(nick)); } catch (e) {} }
+function isDirty(nick) { try { return !!localStorage.getItem(dirtyKey(nick)); } catch (e) { return false; } }
+
+function syncPlayerToServer(checkpoint, overrides = {}) {
+  if (!S.nick || !serverSyncEnabled()) return Promise.resolve(false);
+  void flushV1Log(false);
+  const nick = S.nick;
   const payload = {
     action: 'save_player',
-    nick: S.nick,
+    nick: nick,
     checkpoint: checkpoint || 'progress',
-    state,
+    state: makeProgressSnapshot(overrides),
     sentAt: Date.now(),
   };
+  markDirty(nick);
+  return new Promise(resolve => {
+    // Два ожидающих сохранения с одним и тем же чекпойнтом схлопываем в последнее.
+    const dup = SAVE_Q.items.find(it => !it.sending && it.nick === nick && it.payload.checkpoint === payload.checkpoint);
+    if (dup) {
+      dup.payload = payload;
+      dup.waiters.push(resolve);
+    } else {
+      SAVE_Q.items.push({ nick, payload, waiters: [resolve], sending: false });
+    }
+    void pumpSaves();
+  });
+}
+
+async function sendSaveNow(item) {
   try {
     // Content-Type: text/plain — принципиально важно для Apps Script: запрос с
     // application/json — это "непростой" CORS-запрос, браузер шлёт перед ним
@@ -1207,21 +1738,104 @@ async function syncPlayerToServer(checkpoint, overrides = {}) {
     const res = await fetch(CONFIG.serverEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(item.payload),
       cache: 'no-store',
     });
-    if (!res.ok) return false;
+    if (!res.ok) throw new Error('Save failed: ' + res.status);
     const data = await res.json();
-    if (data && data.player) {
-      try {
-        localStorage.setItem(storeKey(S.nick), JSON.stringify(data.player.state || state));
-      } catch (e) {}
+    LAST_SENT_SIG = stateSig(item.payload.state);
+    if (data && data.player && data.player.state) {
+      // Ответ сервера пишем в localStorage, только если он не старее того,
+      // что игрок успел наиграть, пока запрос летел.
+      const local = loadProgress(item.nick);
+      const localAt = (local && local.updatedAt) || 0;
+      const srvAt = Number(data.player.state.updatedAt) || 0;
+      if (SAVE_Q.items.length <= 1 && srvAt >= localAt) {
+        try { localStorage.setItem(storeKey(item.nick), JSON.stringify(data.player.state)); } catch (e) {}
+      }
     }
     return true;
   } catch (e) {
     return false;
   }
 }
+
+async function pumpSaves() {
+  if (SAVE_Q.busy) return;
+  SAVE_Q.busy = true;
+  let lastNick = null;
+  while (SAVE_Q.items.length) {
+    const it = SAVE_Q.items[0];
+    lastNick = it.nick;
+    it.sending = true;
+    SaveBanner.saving();
+    const ok = await sendSaveNow(it);
+    it.sending = false;
+    if (ok) {
+      SAVE_Q.items.shift();
+      SAVE_Q.failStreak = 0;
+      it.waiters.forEach(w => w(true));
+    } else {
+      SAVE_Q.failStreak += 1;
+      SaveBanner.retry();
+      await new Promise(r => setTimeout(r, Math.min(3000 * SAVE_Q.failStreak, 15000)));
+    }
+  }
+  SAVE_Q.busy = false;
+  if (lastNick) clearDirty(lastNick);
+  if (!V1LOG.inflight) SaveBanner.done();
+}
+
+window.addEventListener('online', () => { void pumpSaves(); void flushV1Log(false); });
+setInterval(() => SaveBanner.refresh(), 500);
+
+// Закрытие вкладки при несохранённых данных: спрашиваем подтверждение и,
+// если всё-таки закрыли, пытаемся дослать остаток через keepalive-запрос.
+window.addEventListener('beforeunload', (e) => {
+  if (SAVE_Q.items.length || V1LOG.inflight) { e.preventDefault(); e.returnValue = ''; }
+});
+
+/* Версия I не пишет на сервер после каждого ответа. Вместо этого при закрытии или
+   сворачивании вкладки (visibilitychange надёжнее beforeunload, особенно на телефонах)
+   одним запросом уходят: пакет ответов + текущая позиция в квесте. Если состояние с
+   прошлой отправки не менялось — запрос не делается. */
+function flushOnHide() {
+  if (!S.nick || !serverSyncEnabled()) return;
+  void flushV1Log(true);
+  if (S.screen === 'quiz') {
+    const state = makeProgressSnapshot();
+    const sig = stateSig(state);
+    if (sig !== LAST_SENT_SIG) {
+      LAST_SENT_SIG = sig;
+      markDirty(S.nick); // если запрос не дойдёт, при следующем заходе локальный прогресс не потеряется
+      try {
+        fetch(CONFIG.serverEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'save_player', nick: S.nick, checkpoint: 'v1-exit', state: state, sentAt: Date.now() }),
+          cache: 'no-store',
+          keepalive: true,
+        });
+      } catch (e) {}
+    }
+  }
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') flushOnHide();
+});
+window.addEventListener('pagehide', () => {
+  flushOnHide();
+  for (const it of SAVE_Q.items) {
+    try {
+      fetch(CONFIG.serverEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(it.payload),
+        keepalive: true,
+      });
+    } catch (e) {}
+  }
+});
 
 /* =======================================================================
    НОРМАЛИЗАЦИЯ ОТВЕТОВ
@@ -1279,7 +1893,7 @@ const CLICK_NOISE = [
   'Ты точно успеешь?', 'Ещё один!', 'Почему так медленно?', 'Шевели пальцами.',
   'Я наблюдаю.', 'Это подозрительно.', 'Не отвлекайся на текст.',
   'Ты что-то пропустил.', 'Продолжай!', 'Не сдавайся.', 'Скорее!',
-  'Один клик — это мало.', 'А вот ещё!', 'Вижу тебя.', 'Хорошо идёт.',
+  'Один клик - это мало.', 'А вот ещё!', 'Вижу тебя.', 'Хорошо идёт.',
   'Ещё!', 'Быстрее-бстрее!', 'Не останавливайся!', 'Куда смотришь?',
   'Ты всё ещё здесь?', 'Кликни ещё.', 'Почти-почти.', 'Это было медленно.',
   'Я считаю.', 'Не расслабляйся.', 'Давай-давай.', 'Ещё немного.',
@@ -1403,7 +2017,7 @@ const QUESTIONS = [
   },
   {
     n: 17, kind: 'text',
-    text: 'Какой у Клима любимый покемон?',
+    text: 'Какая была марка моего первого телефона?',
     check: v => bankCheck('v1', 17, v),
     ok: () => bankMessage('v1', 17),
   },
@@ -1466,37 +2080,49 @@ const V2_QUESTIONS = [
    ВЕРСИЯ III — ОТКРЫТЫЕ ВОПРОСЫ
    ======================================================================= */
 const V3_QUESTIONS = [
-  'Какая моя привычка или особенность тебе особенно нравится?',
-  'Как бы ты описал(а) меня тремя словами?',
-  'Есть ли что-то, что ты давно хотел(а) мне сказать, но никогда не говорил(а)?',
-  'Какой момент нашей дружбы ты надеешься однажды вспомнить и улыбнуться?',
+  'Одно слово. Первое, что приходит в голову, когда ты слышишь моё имя. Не думай.',
+  'Какой момент со мной ты вспоминаешь чаще всего?',
+  'Если бы ты рассказывал(а) обо мне человеку, который меня никогда не видел, - что бы ты сказал(а) в первую очередь?',
+  'Что ты хочешь, чтобы я о тебе помнил(а)?',
 ];
 
-const FRIEND_MESSAGE_CACHE = new Map();
+/* ---------- Финал III: сообщение и мои ответы приходят с сервера ----------
+   В HTML их нет, чтобы нельзя было подсмотреть до конца квеста. Сервер отдаёт их, только если
+   игрок дошёл до версии III. Запрос стартует на заставке перед вопросами, так что к финалу данные
+   обычно уже готовы. */
+let FINALE = null;
+let FINALE_LOADING = null;
 
-async function loadFriendMessage(nick) {
+function loadFinale() {
+  if (FINALE) return Promise.resolve(FINALE);
+  if (FINALE_LOADING) return FINALE_LOADING;
+  if (!S.nick || !serverSyncEnabled()) return Promise.resolve(null);
+  FINALE_LOADING = (async () => {
+    try {
+      let url = CONFIG.serverEndpoint + '?action=finale&nick=' + encodeURIComponent(S.nick);
+      if (S.debugAll && QUESTION_BANK && QUESTION_BANK.codes && QUESTION_BANK.codes.debug) {
+        url += '&debug=' + encodeURIComponent(QUESTION_BANK.codes.debug);
+      }
+      const res = await fetchWithTimeout(url, { cache: 'no-store' }, 15000);
+      if (!res.ok) throw new Error('finale request failed');
+      const data = await res.json();
+      if (data && data.locked === false) { FINALE = data; return data; }
+      // Помогает понять, почему не пришло личное сообщение: locked (+reason) или error (старый деплой Code.gs).
+      console.warn('Finale not available:', data);
+      return null;
+    } catch (e) {
+      console.warn('Finale request failed:', e);
+      return null;
+    } finally {
+      FINALE_LOADING = null;
+    }
+  })();
+  return FINALE_LOADING;
+}
+
+function friendMessage(nick) {
   const key = tight(nick);
-  if (!key || !serverSyncEnabled()) return CONFIG.defaultFriendMessage;
-  if (FRIEND_MESSAGE_CACHE.has(key)) return FRIEND_MESSAGE_CACHE.get(key);
-
-  const request = fetch(
-    CONFIG.serverEndpoint + '?action=friend_message&nick=' + encodeURIComponent(nick),
-    { cache: 'no-store' }
-  )
-    .then(res => {
-      if (!res.ok) throw new Error('Friend message request failed');
-      return res.json();
-    })
-    .then(data => data && typeof data.message === 'string' && data.message.trim()
-      ? data.message
-      : CONFIG.defaultFriendMessage)
-    .catch(error => {
-      console.error('Friend message load failed:', error);
-      return CONFIG.defaultFriendMessage;
-    });
-
-  FRIEND_MESSAGE_CACHE.set(key, request);
-  return request;
+  return CONFIG.friendMessages[key] || CONFIG.friendMessages.__default__;
 }
 
 // Реальные цифры "дошли до вопроса" — тянутся из Google Таблицы (лист Players,
@@ -1507,10 +2133,7 @@ let LIVE_V2_STATS = null;
 async function refreshV2Stats() {
   if (!serverSyncEnabled()) return;
   try {
-    const res = await fetch(
-      CONFIG.serverEndpoint + '?action=stats&nick=' + encodeURIComponent(S.nick || ''),
-      { cache: 'no-store' }
-    );
+    const res = await fetch(CONFIG.serverEndpoint + '?action=stats', { cache: 'no-store' });
     if (!res.ok) return;
     const data = await res.json();
     if (data && data.reached) {
@@ -1523,32 +2146,168 @@ async function refreshV2Stats() {
 }
 
 function reachedCount(n) {
-  // Пока сервер ещё не записал текущего игрока в vII, учитываем его локально.
-  // После синхронизации `currentIncluded` не даст посчитать его второй раз.
-  const addCurrentPlayer = Boolean(S.nick) &&
-    (!LIVE_V2_STATS || !LIVE_V2_STATS.currentIncluded);
-
   if (LIVE_V2_STATS) {
     return {
-      reached: (LIVE_V2_STATS.reached[n] || 0) + (addCurrentPlayer ? 1 : 0),
-      total: (LIVE_V2_STATS.total || 0) + (addCurrentPlayer ? 1 : 0),
+      reached: LIVE_V2_STATS.reached[n] || 0,
+      total: LIVE_V2_STATS.total || 0,
     };
   }
-  return addCurrentPlayer ? { reached: 1, total: 1 } : { reached: 0, total: 0 };
+  return { reached: 0, total: 0 };
 }
 
-// Для будущего вопроса "Преодолеватель": лист Challenges в той же таблице,
-// где ты вручную отмечаешь TRUE в колонке confirmed по мере подтверждения
-// присланных видео. Возвращает {items, confirmedCount, total} или null.
-async function fetchChallengeProgress() {
+/* =======================================================================
+   ПРЕОДОЛЕВАТЕЛЬ — общий список заданий + личный прогресс игрока
+   ======================================================================= */
+let LIVE_CHALLENGES = null;
+let CHALLENGES_LOADING = null;
+let CHALLENGES_POLL = null;
+
+function preodolevatelActive() {
+  const t = trustedNow();
+  if (!t) return false;
+  return t >= new Date(CONFIG.preodolevatelStart) && t < new Date(CONFIG.preodolevatelEnd);
+}
+
+async function refreshChallengeProgress(force = false) {
   if (!serverSyncEnabled()) return null;
-  try {
-    const res = await fetch(CONFIG.serverEndpoint + '?action=challenges', { cache: 'no-store' });
-    if (!res.ok) return null;
-    return await res.json();
-  } catch (e) {
-    return null;
+  if (CHALLENGES_LOADING && !force) return CHALLENGES_LOADING;
+
+  CHALLENGES_LOADING = (async () => {
+    try {
+      const url = CONFIG.serverEndpoint + '?action=challenges';
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) throw new Error('Challenges request failed');
+      const data = await res.json();
+      if (!data || !Array.isArray(data.items)) throw new Error('Invalid challenges data');
+
+      const oldKey = LIVE_CHALLENGES ? JSON.stringify(LIVE_CHALLENGES) : '';
+      LIVE_CHALLENGES = data;
+      S.preodolevatelPoints = Number(data.completedPoints ?? data.completedCount) || 0;
+      S.preodolevatelPassed =
+        S.preodolevatelPoints >= Number(CONFIG.preodolevatelRequiredPoints || 0);
+      saveProgress();
+
+      if (oldKey !== JSON.stringify(data) && S.screen === 'v2quiz') render();
+      return data;
+    } catch (e) {
+      console.error('Challenge progress load failed:', e);
+      return LIVE_CHALLENGES;
+    } finally {
+      CHALLENGES_LOADING = null;
+    }
+  })();
+
+  return CHALLENGES_LOADING;
+}
+
+function startChallengePolling() {
+  if (CHALLENGES_POLL || !S.nick) return;
+  void refreshChallengeProgress(true);
+  CHALLENGES_POLL = setInterval(() => {
+    if (S.screen !== 'v2intro' && S.screen !== 'v2quiz') {
+      clearInterval(CHALLENGES_POLL);
+      CHALLENGES_POLL = null;
+      return;
+    }
+    if (preodolevatelActive()) void refreshChallengeProgress(true);
+  }, Math.max(10000, Number(CONFIG.preodolevatelRefreshMs) || 30000));
+}
+
+function stopChallengePolling() {
+  if (CHALLENGES_POLL) {
+    clearInterval(CHALLENGES_POLL);
+    CHALLENGES_POLL = null;
   }
+}
+
+function preodolevatelStatus() {
+  const points = Number(
+    (LIVE_CHALLENGES && (LIVE_CHALLENGES.completedPoints ?? LIVE_CHALLENGES.completedCount))
+      ?? S.preodolevatelPoints ?? 0
+  );
+  const total = Number((LIVE_CHALLENGES && LIVE_CHALLENGES.total) ?? 0);
+  return {
+    points,
+    total,
+    requiredPoints: Number(CONFIG.preodolevatelRequiredPoints) || 0,
+    passed: points >= (Number(CONFIG.preodolevatelRequiredPoints) || 0),
+  };
+}
+
+function v2PrerequisitesFor5() {
+  const q1to4 = [1,2,3,4].every(n => !!(S.v2Answers[n] && S.v2Answers[n].passed));
+  const preo = preodolevatelStatus().passed;
+  return { q1to4, preo, ready: q1to4 && preo };
+}
+
+function renderPreodolevatelDrawer() {
+  if (!(S.screen === 'v2intro' || S.screen === 'v2quiz')) return;
+  // В обычном режиме плашка живёт только в окне 31.10–04.11.
+  // В debug-режиме её можно открыть вне календаря для тестирования.
+  if (!S.debugAll && !preodolevatelActive()) return;
+  if (document.querySelector('.challenge-drawer')) return;
+
+  const status = preodolevatelStatus();
+  const drawer = el('div', 'challenge-drawer' + (status.passed ? ' complete' : ''));
+  const tab = el('button', 'challenge-tab');
+  const title = el('span');
+  const progress = el('span');
+  const arrow = el('span', 'challenge-arrow', '▼');
+  title.innerHTML = '<strong>ПРЕОДОЛЕВАТЕЛЬ</strong>';
+  progress.textContent = status.passed
+    ? '✓ выполнено'
+    : status.points + ' / ' + status.requiredPoints + ' б.';
+  tab.appendChild(title);
+  tab.appendChild(progress);
+  tab.appendChild(arrow);
+
+  const panel = el('div', 'challenge-panel');
+  const inner = el('div', 'challenge-inner');
+  inner.appendChild(el('p', 'challenge-intro',
+    'Вместе с другими игроками набери ' + status.requiredPoints + ' баллов за испытания из списка.\n' +
+    'Доказательство прохождения отправляй в общий чат для проверки. Лучше всего отправлять видео. Если видео нет, подойдут скриншоты или фото.'));
+
+  const prog = el('div', 'challenge-progress');
+  const progText = el('span', null, status.points + ' из ' + status.requiredPoints + ' б.');
+  const progBar = el('div', 'challenge-progress-bar');
+  const progFill = el('div');
+  progFill.style.width = Math.min(100, status.requiredPoints ? status.points / status.requiredPoints * 100 : 0) + '%';
+  progBar.appendChild(progFill);
+  prog.appendChild(progText);
+  prog.appendChild(progBar);
+  inner.appendChild(prog);
+
+  const list = el('div', 'challenge-list');
+  const items = (LIVE_CHALLENGES && LIVE_CHALLENGES.items) || [];
+  if (!items.length) {
+    list.appendChild(el('p', 'hint', 'Список заданий пока не загружен.'));
+  } else {
+    items.forEach(item => {
+      const row = el('div', 'challenge-item' + (item.completed ? ' done' : ''));
+      const mark = el('div', 'mark', item.completed ? '✓' : '□');
+      const number = el('div', 'challenge-number', String(item.id ?? ''));
+      const text = el('div');
+      text.appendChild(document.createTextNode(String(item.name || 'Без названия')));
+      if (item.note) text.appendChild(el('div', 'note', String(item.note)));
+      const points = el('div', 'challenge-points', '+' + (Number(item.points) || 0) + ' б.');
+      row.appendChild(mark);
+      row.appendChild(number);
+      row.appendChild(text);
+      row.appendChild(points);
+      list.appendChild(row);
+    });
+  }
+  inner.appendChild(list);
+  inner.appendChild(el('div', 'challenge-deadline', 'Выполнить до 04.11'));
+  panel.appendChild(inner);
+  drawer.appendChild(tab);
+  drawer.appendChild(panel);
+  tab.addEventListener('click', () => drawer.classList.toggle('open'));
+  document.body.appendChild(drawer);
+}
+
+function challengeReadyForQ5() {
+  return S.debugAll || v2PrerequisitesFor5().ready;
 }
 
 async function sendForReview(payload) {
@@ -1576,8 +2335,11 @@ const S = {
   unlocked: false,   // код Версии II введён
   v2Index: 0,
   v2Answers: {},
+  preodolevatelPoints: 0,
+  preodolevatelPassed: false,
   v3Index: 0,
   v3Answers: [],
+  termSeen: [],      // индексы фраз терминала Версии II, которые этот игрок уже видел
   debugAll: false,   // служебный режим: доступ ко всем вопросам, в localStorage не сохраняется
   timerRevealed: false, // таймер II-5 стал глобальным (виден на любом экране кроме Версии III)
 };
@@ -1589,7 +2351,16 @@ function slot(n) {
 
 function v2slot(n) {
   if (!S.v2Answers[n]) S.v2Answers[n] = {};
-  return S.v2Answers[n];
+  const st = S.v2Answers[n];
+  // Сохраняем историю всех попыток вопроса, чтобы backend мог сложить
+  // их в одну ячейку vII. Старые сохранения с одним value тоже поддерживаются.
+  if (!Array.isArray(st.history)) {
+    st.history = [];
+    if (st.value !== undefined && st.value !== null && String(st.value) !== '') {
+      st.history.push(String(st.value));
+    }
+  }
+  return st;
 }
 
 function passedCount() {
@@ -2006,11 +2777,12 @@ function render() {
   if (S.screen === 'v3transition') startV3Music();
   else if (S.screen === 'v3quiz' || S.screen === 'v3final') startV3Music();
   else stopV3Music();
-  document.querySelectorAll('.version-toggle, .hud-ticker, .hud-telemetry, .hud-wave, .debug-fab, .debug-panel, .global-timer, .v3-blob-field').forEach(n => n.remove());
-  if (S.screen === 'intro') { renderIntro(); return; }
-  if (S.screen === 'final') { renderFinal(); mountVersionToggle(); mountDebugPanel(); mountGlobalTimer(); return; }
-  if (S.screen === 'v2intro') { renderV2Intro(); mountVersionToggle(); mountHudChrome(); mountDebugPanel(); mountGlobalTimer(); return; }
-  if (S.screen === 'v2quiz') { renderV2Question(); mountVersionToggle(); mountHudChrome(); mountDebugPanel(); mountGlobalTimer(); return; }
+  document.querySelectorAll('.version-toggle, .hud-ticker, .hud-telemetry, .hud-wave, .debug-fab, .debug-panel, .global-timer, .challenge-drawer, .v3-blob-field, .v2-terminal, .skip-quest').forEach(n => n.remove());
+  mountSkipButton();
+  if (S.screen === 'intro') { stopChallengePolling(); renderIntro(); return; }
+  if (S.screen === 'final') { stopChallengePolling(); renderFinal(); mountVersionToggle(); mountDebugPanel(); mountGlobalTimer(); return; }
+  if (S.screen === 'v2intro') { startChallengePolling(); renderV2Intro(); renderPreodolevatelDrawer(); mountVersionToggle(); mountHudChrome(); mountDebugPanel(); mountGlobalTimer(); return; }
+  if (S.screen === 'v2quiz') { startChallengePolling(); renderV2Question(); renderPreodolevatelDrawer(); mountVersionToggle(); mountHudChrome(); mountDebugPanel(); mountGlobalTimer(); return; }
   if (S.screen === 'v3transition') { renderV3Transition(); mountDebugPanel(); mountV3Decor(); return; }
   if (S.screen === 'v3quiz') { renderV3Question(); mountDebugPanel(); mountV3Decor(); return; }
   if (S.screen === 'v3final') { renderV3Final(); mountDebugPanel(); mountV3Decor(); return; }
@@ -2126,7 +2898,7 @@ function triggerV2Unlock() {
     playV2UnlockSfx('crack3');
   
     setTimeout(() => {
-      burst('v2-shake-large', 0, 12, 24, 420, 'v2-catastrophe');
+      burst('v2-shake-large', 0, 20, 28, 520, 'v2-catastrophe');
     }, 220);
   }, 3150));
 
@@ -2170,7 +2942,7 @@ function triggerV2Unlock() {
       const rotation = (Math.random() * 2 - 1) * 9;
 
       copy.style.transform = 'translate3d(0,0,0) rotate(0deg) scale(1)';
-      copy.style.opacity = '1';
+      copy.style.filter = 'blur(0) brightness(1)';
       fallLayer.appendChild(copy);
       falling.push({ copy, rect, vx, vy0, gravity, delay, rotation, startX: rect.left, startY: rect.top, started: false, startTime: 0 });
       original.style.visibility = 'hidden';
@@ -2199,7 +2971,7 @@ function triggerV2Unlock() {
         const rotation = item.rotation * Math.min(1, t / 1.5) + (item.vx < 0 ? -1 : 1) * 2.5 * t;
 
         item.copy.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0) rotate(${rotation.toFixed(2)}deg) scale(${(1 - Math.min(.1, t * .025)).toFixed(3)})`;
-        item.copy.style.opacity = Math.max(.72, 1 - t * .12).toFixed(3);
+        item.copy.style.filter = `blur(${Math.min(3, t * 0.9).toFixed(2)}px) brightness(${Math.max(.68, 1 - t * .14).toFixed(3)})`;
 
         const stillVisible = item.startY + y < window.innerHeight + 500;
         if (stillVisible) active = true;
@@ -2231,27 +3003,191 @@ function triggerV2Unlock() {
     S.screen = 'v2intro';
     render();
 
-    // 5.mp3 звучит на полностью чёрном экране в течение своих 3 секунд.
-    playV2UnlockSfx('blackHum');
+    // Пока экран полностью чёрный, проигрываем одноразовый гул перехода (5.mp3).
+    // Он остаётся частью самого перехода и не переносится в момент появления UI.
+    setTimeout(() => {
+      playV2UnlockSfx('blackHum');
+    }, 350);
 
-    // Держим экран полностью чёрным все 3 секунды, затем открываем Версию II.
+    // Затем начинаем постоянный гул Версии II ещё до появления первого UI-элемента.
+    // Он постепенно подмешивается во время затемнения/рассеивания чёрного экрана.
+    setTimeout(() => {
+      startV2Ambient();
+    }, 5200);
+
+    // После нескольких секунд полной темноты начинаем уводить чёрный экран.
+    // UI всё ещё скрыт классом v2-reveal-seq и начнёт появляться позже.
     setTimeout(() => {
       flash.style.transition = 'opacity 3.8s cubic-bezier(.2,.75,.25,1)';
       flash.style.opacity = '0';
     }, 3000);
 
-    // Держим анимацию появления дольше, чем сам fade из чёрного.
     setTimeout(() => {
       flash.remove();
-    }, 7200);
+    }, 6900);
 
+    // Завершаем кинематографичное появление после того, как все элементы успели войти.
     setTimeout(() => {
       document.body.classList.remove('v2-reveal-seq');
       document.body.classList.add('v2-reveal-done');
-      startV2Ambient();
-    }, 9000);
+    }, 14000);
   }, 9500));
 }
+/* ---------- Терминал Версии II ----------
+   Раз в 2–5 минут (редко) в терминале появляется фраза «от автора».
+   Одну и ту же фразу один игрок не увидит дважды — список увиденных лежит в S.termSeen
+   и сохраняется вместе с прогрессом. Когда фразы кончились — терминал молчит. */
+const TERMINAL_MESSAGES = [
+  'Ты всё ещё здесь. Хорошо.',
+  'Я вижу, как ты думаешь.',
+  'Не закрывай вкладку.',
+  'Кто-то уже прошёл дальше тебя.',
+  'Ты уверен, что это игра?',
+  'Здесь никогда не бывает по-настоящему тихо.',
+  'Я знаю, что ты пробовал угадывать.',
+  'Не доверяй первому ответу.',
+  'За тобой наблюдают. Шучу. Наверное.',
+  'Сигнал стал сильнее с тех пор, как ты пришёл.',
+  'Иногда ответ - это то, чего ты боишься.',
+  'Осталось меньше, чем кажется.',
+  'Не оглядывайся. Просто проверь.',
+  'Я оставил тебе подсказку. Ты её уже проглядел.',
+  'У каждого пути есть конец. У этого - тоже.',
+  'Ты когда-нибудь задумывался, кто пишет эти вопросы?',
+  'ЗАПИСЬ В ПРОЦЕССЕ.',
+  'Ссли станет не по себе - это нормально. Так и задумано.',
+  'Тише. Слушай.',
+  'Не все двери здесь ведут вперёд.',
+  'Я рад, что это именно ты.',
+  'Выпей воды. серьёзно.',
+  'Давно сидишь? Встань, потянись. Я подожду.',
+  'Мне нравится наблюдать, как ты ошибаешься.',
+  'Ничего не случится. пока.',
+  'Эта комната тоже слышит.',
+  'Я не злюсь. Просто жду.',
+  'Ты ведь помнишь, с чего всё началось?',
+  'Финал уже написан. Осталось дойти.',
+  'Смотри внимательнее. Всегда есть второй слой.',
+  'Не пиши мне ответ. Я и так знаю.',
+  'Ты не первый, кто сюда дошёл. Но, возможно, последний.',
+  'Долго ты. Но ладно, не торопись.',
+  'Обернись. Или не оборачивайся. Как хочешь.',
+];
+
+const TERM = { timer: null, hideTimer: null, typing: null, log: [], openUntil: 0 };
+
+function termInV2() { return S.screen === 'v2intro' || S.screen === 'v2quiz'; }
+
+function termSchedule(delay) {
+  clearTimeout(TERM.timer);
+  const d = delay != null ? delay : 120000 + Math.random() * 180000; // 2–5 минут
+  TERM.timer = setTimeout(termFire, d);
+}
+
+function termFire() {
+  // Показываем только в Версии II, на видимой вкладке и не во время заставки появления.
+  if (!termInV2() || document.hidden || document.body.classList.contains('v2-reveal-seq') || !document.querySelector('.v2-terminal')) {
+    TERM.timer = setTimeout(termFire, 15000);
+    return;
+  }
+  const shown = termEmit(false);
+  if (shown !== null) termSchedule(); // null — фразы закончились, больше не планируем
+}
+
+// preview=true — тестовый показ из debug-панели (ничего не помечает увиденным)
+function termEmit(preview) {
+  let text;
+  if (preview) {
+    text = TERMINAL_MESSAGES[Math.floor(Math.random() * TERMINAL_MESSAGES.length)];
+  } else {
+    const seen = Array.isArray(S.termSeen) ? S.termSeen : (S.termSeen = []);
+    const pool = [];
+    for (let i = 0; i < TERMINAL_MESSAGES.length; i++) if (!seen.includes(i)) pool.push(i);
+    if (!pool.length) return null;
+    const idx = pool[Math.floor(Math.random() * pool.length)];
+    seen.push(idx);
+    saveProgress();
+    text = TERMINAL_MESSAGES[idx];
+  }
+  TERM.log.push({ text });
+  while (TERM.log.length > 3) TERM.log.shift();
+  TERM.openUntil = Date.now() + 22000;
+  termPaint(true);
+  clearTimeout(TERM.hideTimer);
+  TERM.hideTimer = setTimeout(() => {
+    const t = document.querySelector('.v2-terminal');
+    if (t) t.classList.remove('open');
+  }, 22000);
+  return true;
+}
+
+function termPaint(typeLast) {
+  const box = document.querySelector('.v2-terminal');
+  if (!box) return;
+  const log = box.querySelector('.t-log');
+  log.innerHTML = '';
+  if (TERM.typing) { clearInterval(TERM.typing); TERM.typing = null; }
+  TERM.log.forEach((m, i) => {
+    const line = el('div', 't-line');
+    const txt = document.createElement('span');
+    txt.textContent = m.text;
+    line.appendChild(txt);
+    log.appendChild(line);
+    if (typeLast && i === TERM.log.length - 1) {
+      let k = 0;
+      TERM.typing = setInterval(() => {
+        if (!txt.isConnected) { clearInterval(TERM.typing); TERM.typing = null; return; }
+        k++;
+        txt.textContent = m.text.slice(0, k);
+        if (k >= m.text.length) { clearInterval(TERM.typing); TERM.typing = null; }
+      }, 45);
+    } else {
+      txt.textContent = m.text;
+    }
+  });
+  box.classList.add('open');
+}
+
+function mountTerminal() {
+  if (!document.body.classList.contains('v2-theme')) return;
+  if (document.querySelector('.v2-terminal')) return;
+  const box = el('div', 'v2-terminal');
+  const head = el('div', 't-head');
+  head.innerHTML = '&gt;_ TERMINAL <span class="t-cur">█</span>';
+  box.appendChild(head);
+  box.appendChild(el('div', 't-log'));
+  document.body.appendChild(box);
+  if (TERM.log.length && Date.now() < TERM.openUntil) termPaint(false); // после перерисовки экрана возвращаем открытое окно
+  if (!TERM.timer) termSchedule();
+}
+
+/* ---------- Кнопка «Пропустить квест» ----------
+   Появляется после CONFIG.skipQuestFrom (по серверному времени) или в debug-режиме.
+   Ведёт сразу на Версию III. */
+function skipAvailable() {
+  if (S.debugAll) return true;
+  const t = trustedNow();
+  return !!t && t >= new Date(CONFIG.skipQuestFrom);
+}
+
+function mountSkipButton() {
+  if (!['quiz', 'final', 'v2intro', 'v2quiz'].includes(S.screen)) return;
+  if (!S.nick || !skipAvailable()) return;
+  if (document.querySelector('.skip-quest')) return;
+  const b = el('button', 'skip-quest' + (S.debugAll ? ' with-debug' : ''), 'Пропустить квест →');
+  b.title = 'Перейти сразу к версии III';
+  b.addEventListener('click', () => {
+    if (!window.confirm('Пропустить весь квест и перейти сразу к версии III?')) return;
+    stopChallengePolling();
+    S.screen = 'v3transition';
+    S.v3Index = 0;
+    saveProgress();
+    void syncPlayerToServer('skip-to-v3', { screen: 'v3transition' });
+    render();
+  });
+  document.body.appendChild(b);
+}
+
 /* ---------- Служебная панель доступа ко всем вопросам ---------- */
 function mountDebugPanel() {
   if (!S.debugAll) return;
@@ -2272,11 +3208,14 @@ function mountDebugPanel() {
 
   panel.appendChild(row('V1', QUESTIONS.map(q => [String(q.n), () => { S.screen = 'quiz'; S.index = q.n - 1; render(); }])));
   panel.appendChild(row('V2', V2_QUESTIONS.map(q => [String(q.n), () => { S.unlocked = true; S.screen = 'v2quiz'; S.v2Index = q.n - 1; render(); }])));
+  panel.appendChild(row('P', [['Преодолеватель', () => { S.unlocked = true; S.debugAll = true; S.screen = 'v2quiz'; void refreshChallengeProgress(true); render(); }]]));
   panel.appendChild(row('V3', [
     ['интро', () => { S.screen = 'v3transition'; render(); }],
     ['вопросы', () => { S.screen = 'v3quiz'; S.v3Index = 0; render(); }],
     ['финал', () => { S.screen = 'v3final'; render(); }],
   ]));
+
+  panel.appendChild(row('T', [['фраза терминала', () => { termEmit(true); }]]));
 
   fab.addEventListener('click', () => {
     panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
@@ -2321,6 +3260,7 @@ function mountHudChrome() {
   wave.appendChild(bars);
   wave.appendChild(el('div', 'lbl', 'ANALYZING SIGNAL…'));
   document.body.appendChild(wave);
+  mountTerminal();
 }
 
 function addHudCorners(card) {
@@ -2473,12 +3413,15 @@ function renderIntro() {
   btn.disabled = true;
   card.appendChild(btn);
 
+  let prefetchTimer = null;
   input.addEventListener('input', () => {
     const v = input.value.trim();
     btn.disabled = v.length === 0;
+    clearTimeout(prefetchTimer);
+    if (v.length >= 2) prefetchTimer = setTimeout(() => { void prefetchServerProgress(v); }, 900);
     const saved = v ? loadProgress(v) : null;
     note.textContent = saved
-      ? 'С этим ником уже есть прогресс — продолжим с того же места.'
+      ? 'С этим ником уже есть прогресс, продолжим с того же места.'
       : 'По нику сохраняется прогресс: сможешь вернуться и продолжить.';
   });
 
@@ -2502,7 +3445,14 @@ function renderIntro() {
     }
     
     btn.disabled = true;
-    note.textContent = 'Синхронизация с сервером…';
+    note.textContent = 'Загружаем данные…';
+
+    const localSaved = loadProgress(v);
+    const dirtyAtStart = isDirty(v);
+
+    // Запрос прогресса стартует сразу и идёт параллельно с банком вопросов
+    // (часто он уже готов — его запускает ввод ника).
+    const serverP = prefetchServerProgress(v);
 
     if (!await loadQuestionBank()) {
       note.textContent = 'Не удалось загрузить данные квеста. Проверь подключение к серверу.';
@@ -2510,32 +3460,90 @@ function renderIntro() {
       return;
     }
 
-    const localSaved = loadProgress(v);
-    const serverSaved = await loadServerProgress(v);
+    let serverSaved;
+    if (localSaved) {
+      // Есть локальный прогресс: ждём сервер недолго. Не успел — стартуем с локального,
+      // а сверку с сервером доделаем в фоне.
+      serverSaved = await Promise.race([serverP, new Promise(r => setTimeout(() => r(undefined), 2500))]);
+    } else {
+      note.textContent = 'Ищем твой прогресс…';
+      serverSaved = await serverP;
+    }
+    const stillPending = serverSaved === undefined;
+    const serverFailed = stillPending || !!(serverSaved && serverSaved.__error);
+
+    if (serverFailed && !localSaved) {
+      // Не знаем, есть ли у игрока прогресс на сервере — не создаём «нового», чтобы его не затереть.
+      note.textContent = 'Не удаётся связаться с сервером, чтобы проверить твой прогресс. Проверь интернет и попробуй ещё раз.';
+      btn.disabled = false;
+      return;
+    }
 
     S.nick = v;
-    if (serverSaved && serverSaved.state) {
-      // Сервер — основной источник истины при наличии записи.
-      applyProgress(serverSaved.state);
-    } else if (localSaved) {
-      // Первый запуск новой серверной версии: переносим старый localStorage на сервер.
+    v1LogLoad(v);
+    void flushV1Log(false); // догоняем журнал прошлой сессии, если он остался
+    if (serverFailed) {
+      // Сервер пока не ответил, но на устройстве есть сохранение — продолжаем с него.
       applyProgress(localSaved);
-      await syncPlayerToServer('migration');
+    } else if (serverSaved && serverSaved.state) {
+      const srv = serverSaved.state;
+      if (localSaved && dirtyAtStart && (Number(localSaved.updatedAt) || 0) >= (Number(srv.updatedAt) || 0)) {
+        // Прошлое сохранение не успело уйти на сервер — локальная версия новее.
+        applyProgress(localSaved);
+        void syncPlayerToServer('resume-local');
+      } else {
+        // Сервер — основной источник истины при наличии записи.
+        applyProgress(srv);
+      }
+    } else if (localSaved) {
+      // Первый запуск новой серверной версии: переносим старый localStorage на сервер (в фоне).
+      applyProgress(localSaved);
+      void syncPlayerToServer('migration');
     } else {
       S.index = 0;
       S.answers = {};
       S.unlocked = false;
       S.v2Index = 0;
       S.v2Answers = {};
+      S.preodolevatelPoints = 0;
+      S.preodolevatelPassed = false;
       S.v3Index = 0;
       S.v3Answers = [];
       S.timerRevealed = false;
+      S.termSeen = [];
       S.screen = 'quiz';
       saveProgress();
-      await syncPlayerToServer('created');
+      void syncPlayerToServer('created'); // запись нового игрока — в фоне, квест не ждёт
     }
 
     render();
+
+    if (stillPending && !dirtyAtStart) {
+      // Сервер ответил уже после старта: если там прогресс новее (играли с другого устройства) — предложим его.
+      serverP.then(res => {
+        if (!res || res.__error || !res.state || S.nick !== v) return;
+        const srvAt = Number(res.state.updatedAt) || 0;
+        if (srvAt > (Number(localSaved.updatedAt) || 0)) offerServerProgress(res.state);
+      });
+    }
+  }
+
+  function offerServerProgress(srvState) {
+    const box = document.createElement('div');
+    box.setAttribute('style', 'position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:99991;background:rgba(40,28,52,.96);color:#fff;font:13px/1.35 system-ui,sans-serif;padding:10px 14px;border-radius:14px;max-width:92vw;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center');
+    const t = document.createElement('span');
+    t.textContent = 'На сервере нашёлся более свежий прогресс (возможно, с другого устройства).';
+    box.appendChild(t);
+    const mk = (label, primary, fn) => {
+      const b = document.createElement('button');
+      b.textContent = label;
+      b.setAttribute('style', 'border:0;border-radius:99px;padding:6px 12px;font-size:12.5px;cursor:pointer;' + (primary ? 'background:#7b3fa0;color:#fff' : 'background:#efe2f7;color:#7b3fa0'));
+      b.addEventListener('click', () => { box.remove(); fn(); });
+      box.appendChild(b);
+    };
+    mk('Загрузить', true, () => { applyProgress(srvState); saveProgress(); render(); });
+    mk('Остаться', false, () => {});
+    document.body.appendChild(box);
   }
 
   btn.addEventListener('click', start);
@@ -2588,12 +3596,11 @@ function nextButton(label) {
       return;
     }
 
-    // I-20: отправляем весь профиль игрока на сервер перед финальным экраном.
+    // I-20: профиль уходит на сервер в фоне — финальный экран открывается сразу.
     btn.disabled = true;
-    btn.textContent = 'Сохраняем…';
     S.screen = 'final';
     saveProgress();
-    await syncPlayerToServer('v1-complete', { screen: 'final' });
+    void syncPlayerToServer('v1-complete', { screen: 'final' });
     render();
   });
   return btn;
@@ -2726,7 +3733,7 @@ function buildYesNo(q, body) {
         if (CONFIG.cookingVideoUrl) {
           p.innerHTML = '<a href="' + CONFIG.cookingVideoUrl + '" target="_blank" rel="noopener">Смотри сам →</a>';
         } else {
-          p.textContent = '[тут будет ссылка на видео]';
+          p.textContent = 'https://www.youtube.com/@Kreazot316';
         }
         out.appendChild(p);
       }
@@ -2775,6 +3782,7 @@ function buildSports(q, body) {
       out.appendChild(v);
     }
     if (st.found.length >= CONFIG.sportsTarget) {
+      out.appendChild(verdict('ok', 'Ого. Похоже, ты знаешь обо мне довольно много.'));
       out.appendChild(el('div', 'codebox', 'diversity = bigmak ** 2 - 5'));
     }
     chips.innerHTML = '';
@@ -3081,6 +4089,7 @@ function buildConfirm(q, body) {
   yes.addEventListener('click', () => {
     st.step = step + 1;
     saveProgress();
+    void recordV1Answer(q.n, 'да', null, st.passed, { step: step + 1 });
     render();
   });
   const no = el('button', 'ghost', 'Нет');
@@ -3093,6 +4102,7 @@ function buildConfirm(q, body) {
       st.failMsg = 'Тебе не хватает решительности!';
     }
     saveProgress();
+    void recordV1Answer(q.n, 'нет', false, st.passed, { step: step, failed: true });
     render();
   });
   row.appendChild(yes);
@@ -3203,6 +4213,8 @@ function buildHaystack(q, body) {
 
 /* ---------- Финальный экран ---------- */
 function renderFinal() {
+  const wrap = el('div', 'final-screen-center');
+
   const card = el('div', 'card');
   card.appendChild(el('h2', null, 'Спасибо за прохождение опроса!'));
   card.appendChild(el('p', 'lead', 'Надеюсь, тебе понравилось!'));
@@ -3212,17 +4224,27 @@ function renderFinal() {
   score.style.marginTop = '14px';
   card.appendChild(score);
 
-  const secret = el('div', 'final-secret',
-    'secret = зрение**teto - (2 * zzz) / sparxie + hanged_man**bigmak - diversity + 6070\nprint(str(secret)[:8])');
+  const secret = el('div', 'final-secret');
+  const secComment = el('span', 'sec-comment');
+  secComment.textContent = '# ну и куда мне это вводить? ладно, пока будет тут';
+  const secLine = el('span', 'sec-line');
+  secLine.textContent = 'secret = зрение**teto - (2 * zzz) / sparxie + hanged_man**bigmak - diversity + 6070';
+  const secPrint = el('span', 'sec-comment');
+  secPrint.textContent = 'print(str(secret)[:8])';
+  secret.appendChild(secComment);
+  secret.appendChild(secLine);
+  secret.appendChild(secPrint);
   card.appendChild(secret);
 
-  app.appendChild(card);
+  wrap.appendChild(card);
 
   const line = el('div', 'switchline');
   const back = el('button', null, 'Пройти вопросы заново');
   back.addEventListener('click', () => { S.index = 0; S.screen = 'quiz'; render(); });
   line.appendChild(back);
-  app.appendChild(line);
+  wrap.appendChild(line);
+
+  app.appendChild(wrap);
 }
 
 /* ============================================================
@@ -3253,8 +4275,19 @@ function formatDate(d) {
 
 function v2NextButton() {
   const btn = el('button', 'primary', 'Следующее испытание →');
+  const nextNumber = S.v2Index + 2;
+  if (nextNumber === 5 && !challengeReadyForQ5()) {
+    btn.disabled = true;
+    btn.textContent = 'Нужно пройти «Преодолевателя»';
+  }
   btn.addEventListener('click', () => {
+    if (btn.disabled) return;
     if (S.v2Index < V2_QUESTIONS.length - 1) {
+      const target = S.v2Index + 1;
+      if (target === 4 && !challengeReadyForQ5()) {
+        render();
+        return;
+      }
       S.v2Index += 1;
       saveProgress();
       void syncPlayerToServer('v2-navigation', { screen: 'v2quiz' });
@@ -3276,7 +4309,15 @@ function renderV2Question() {
     card.appendChild(el('p', 'big', QUESTION_BANK_FAILED
       ? 'Не удалось загрузить данные испытаний'
       : 'Синхронизация данных испытаний…'));
-    card.appendChild(el('p', 'hint', 'Обнови страницу и попробуй снова.'));
+    card.appendChild(el('p', 'hint', 'Проверь подключение к интернету.'));
+    const retryBank = el('button', 'primary', 'Повторить');
+    retryBank.style.marginTop = '14px';
+    retryBank.addEventListener('click', () => {
+      QUESTION_BANK_FAILED = false;
+      render();
+      void loadQuestionBank().then(() => { if (S.screen === 'v2quiz' || S.screen === 'v2intro') render(); });
+    });
+    card.appendChild(retryBank);
     app.appendChild(card);
     return;
   }
@@ -3298,8 +4339,16 @@ function renderV2Question() {
       card.appendChild(el(
         'p',
         'hint',
-        'Обнови страницу и попробуй снова.'
+        'Пробуем снова автоматически. Можно нажать кнопку ниже.'
       ));
+      const retryTime = el('button', 'primary', 'Повторить сейчас');
+      retryTime.style.marginTop = '14px';
+      retryTime.addEventListener('click', () => {
+        SERVER_TIME_FAILED = false;
+        render();
+        void syncTrustedTime();
+      });
+      card.appendChild(retryTime);
     } else {
       card.appendChild(el('p', 'big', 'Синхронизация времени…'));
       card.appendChild(el(
@@ -3321,7 +4370,7 @@ function renderV2Question() {
   ) {
     const card = el('div', 'card locked-box');
     addHudCorners(card);
-    card.appendChild(el('p', 'big', 'Испытание ещё не готово'));
+    card.appendChild(el('p', 'big', 'Время ещё не пришло'));
     card.appendChild(el(
       'p',
       'hint',
@@ -3331,6 +4380,22 @@ function renderV2Question() {
     setTimeout(() => {
       if (S.screen === 'v2quiz') render();
     }, 60000);
+    return;
+  }
+
+  if (q.n === 5 && !challengeReadyForQ5() && !v2slot(5).passed) {
+    const card = el('div', 'card locked-box');
+    addHudCorners(card);
+    const req = v2PrerequisitesFor5();
+    const status = preodolevatelStatus();
+    card.appendChild(el('p', 'big', 'II-5 ещё заблокировано'));
+    card.appendChild(el('p', 'hint',
+      (req.q1to4 ? '✓ II-1 - II-4 пройдены.' : 'Нужно пройти II-1 - II-4.') + '<br>' +
+      (req.preo
+        ? '✓ «Преодолеватель» выполнен.'
+        : '«Преодолеватель»: ' + status.points + ' из ' + status.requiredPoints + ' б.')
+    ));
+    app.appendChild(card);
     return;
   }
 
@@ -3347,7 +4412,8 @@ function renderV2Question() {
   if (q.hint) card.appendChild(el('p', 'hint', q.hint));
 
   const rc = reachedCount(q.n);
-  card.appendChild(el('p', 'stage-stats', rc.reached + ' из ' + rc.total + ' дошли до этого вопроса'));
+  // Пока статистика не пришла с сервера — вместо «0 из 0» ничего не показываем.
+  if (rc.total > 0) card.appendChild(el('p', 'stage-stats', rc.reached + ' из ' + rc.total + ' дошли до этого вопроса'));
 
   const body = el('div');
   card.appendChild(body);
@@ -3386,21 +4452,19 @@ function buildV2Text(q, body) {
 
   async function submit() {
     st.value = input.value;
+    if (String(input.value).trim() !== '') st.history.push(String(input.value));
     st.lastCorrect = !!q.check(input.value);
     if (st.lastCorrect) {
-      const wasPassed = !!st.passed;
       st.passed = true;
       SFX.correctV2();
-      saveProgress();
-      paint();
-      if (!wasPassed) {
-        void syncPlayerToServer('v2-' + q.n, { screen: 'v2quiz' });
-      }
     } else {
       SFX.wrongV2();
-      saveProgress();
-      paint();
     }
+    saveProgress();
+    paint();
+    // Синхронизируем и неправильные попытки тоже — backend хранит их
+    // в одной клетке соответствующего вопроса.
+    void syncPlayerToServer('v2-' + q.n, { screen: 'v2quiz' });
   }
   answerBtn.addEventListener('click', submit);
   input.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
@@ -3484,10 +4548,14 @@ function buildV2Countdown(q, body) {
 
   function submit() {
     st.value = input.value;
+    if (String(input.value).trim() !== '') st.history.push(String(input.value));
     st.lastCorrect = !!q.check(input.value);
     if (st.lastCorrect) SFX.correctV2();
     else SFX.wrongV2();
     paintVerdict();
+    saveProgress();
+    // Записываем каждую попытку, включая неправильную.
+    void syncPlayerToServer('v2-' + q.n, { screen: 'v2quiz' });
     if (st.lastCorrect && !st.passed) {
       st.passed = true;
       saveProgress();
@@ -3504,7 +4572,6 @@ function buildV2Countdown(q, body) {
       }, 2200);
       return;
     }
-    saveProgress();
   }
   answerBtn.addEventListener('click', submit);
   input.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
@@ -3698,8 +4765,9 @@ function launchSnake(q, st) {
    ВЕРСИЯ III
    ============================================================ */
 function renderV3Transition() {
+  void loadFinale(); // 14 секунд заставки — с запасом хватит, чтобы подтянуть финал
   const wrap = el('div', 'v3-transition-text',
-    'Скоро ты дойдёшь до конца, осталось немного.<br>Я не задержу тебя надолго, но ответь, пожалуйста, ещё на пару вопросов.');
+    'Всё. Спектакль закончился.\nДальше не квест. Дальше - ты и я.\nОтветь ещё на пару вопросов. Честно.');
   app.appendChild(wrap);
   setTimeout(() => {
     S.screen = 'v3quiz';
@@ -3709,6 +4777,7 @@ function renderV3Transition() {
 }
 
 function renderV3Question() {
+  void loadFinale(); // повтор на случай, если на заставке не получилось
   const i = S.v3Index;
   const text = V3_QUESTIONS[i];
   const card = el('div', 'v3-card');
@@ -3729,6 +4798,19 @@ function renderV3Question() {
   card.appendChild(row);
   app.appendChild(card);
 
+  // Окно ввода и кнопка появляются через 4 секунды после вопроса (на каждом вопросе).
+  label.classList.add('v3-late');
+  row.classList.add('v3-late');
+  textarea.disabled = true;
+  btn.disabled = true;
+  setTimeout(() => {
+    if (!card.isConnected) return;
+    textarea.disabled = false;
+    btn.disabled = false;
+    label.classList.add('in');
+    row.classList.add('in');
+  }, 4000);
+
   btn.addEventListener('click', async () => {
     if (btn.disabled) return;
     S.v3Answers[i] = { q: text, a: textarea.value };
@@ -3738,35 +4820,104 @@ function renderV3Question() {
       render();
     } else {
       btn.disabled = true;
-      btn.textContent = 'Сохраняем…';
       S.screen = 'v3final';
       saveProgress();
-      await syncPlayerToServer('v3-complete', { screen: 'v3final' });
+      void syncPlayerToServer('v3-complete', { screen: 'v3final' });
       void sendForReview({ nick: S.nick, v3: S.v3Answers, finishedAt: Date.now() });
       render();
     }
   });
 }
 
+// Окна с вопросами версии III и моими ответами: плавают вокруг сообщения.
+// Клик/тап по окну — поднять наверх и остановить, чтобы спокойно прочитать.
+function buildOwnerWindows(wrap, answers) {
+  answers = Array.isArray(answers) ? answers : [];
+  const layer = el('div', 'v3-float-layer');
+
+  V3_QUESTIONS.forEach((question, i) => {
+    const answer = String(answers[i] == null ? '' : answers[i]).trim();
+    if (!answer) return;
+
+    const win = el('div', 'v3-win w' + (i + 1));
+    win.tabIndex = 0;
+
+    const bar = el('div', 'v3-win-bar', '<span class="dots"><i></i><i></i><i></i></span><span class="ttl"></span>');
+    bar.querySelector('.ttl').textContent = 'Вопрос ' + (i + 1);
+
+    const body = el('div', 'v3-win-body');
+    const q = el('p', 'v3-win-q');
+    q.textContent = question;
+    const tag = el('span', 'v3-win-tag');
+    tag.textContent = 'мой ответ';
+    const a = el('p', 'v3-win-a');
+    a.textContent = answer;
+    body.append(q, tag, a);
+
+    win.append(bar, body);
+    const toggle = () => {
+      const was = win.classList.contains('front');
+      layer.querySelectorAll('.v3-win.front').forEach(n => n.classList.remove('front'));
+      if (!was) win.classList.add('front');
+    };
+    win.addEventListener('click', (e) => { e.stopPropagation(); toggle(); });
+    win.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+    });
+    layer.appendChild(win);
+  });
+
+  if (!layer.children.length) return;
+  wrap.addEventListener('click', () => {
+    layer.querySelectorAll('.v3-win.front').forEach(n => n.classList.remove('front'));
+  });
+  wrap.appendChild(layer);
+}
+
 function renderV3Final() {
   const wrap = el('div', 'v3-final-wrap');
-  const box = el('div', 'v3-final-msg', CONFIG.friendMessageLoadingText);
+  const box = el('div', 'v3-final-msg');
+  box.style.whiteSpace = 'pre-line';
   wrap.appendChild(box);
 
   startV3Music();
 
   app.appendChild(wrap);
 
-  void loadFriendMessage(S.nick).then(message => {
-    if (S.screen === 'v3final' && box.isConnected) box.textContent = message;
+  let windowsBuilt = false;
+  const show = (data) => {
+    if (!wrap.isConnected) return;
+    box.textContent = (data && data.message) || friendMessage(S.nick);
+    if (data && !windowsBuilt) {
+      windowsBuilt = true;
+      buildOwnerWindows(wrap, data.answers);
+    }
+  };
+
+  if (FINALE) { show(FINALE); return; }
+  if (!serverSyncEnabled()) { show(null); return; }
+
+  box.textContent = '…';
+  // Данные ещё не пришли: пробуем ещё пару раз (сервер мог не успеть увидеть, что игрок дошёл до III).
+  const attempt = (n) => loadFinale().then(d => {
+    if (d) show(d);
+    else if (n < 2 && wrap.isConnected) setTimeout(() => attempt(n + 1), 2500);
   });
+  attempt(0);
+  // Если сервер молчит — показываем запасное сообщение; пришедшие позже данные его заменят.
+  setTimeout(() => { if (!FINALE && wrap.isConnected && box.textContent === '…') show(null); }, 9000);
 }
 void loadQuestionBank().then(() => {
   if (S.screen !== 'intro' && !QUESTION_BANK) render();
 });
 syncTrustedTime();
-refreshV2Stats();
+setTimeout(refreshV2Stats, 3000); // не мешаем банку и времени — статистика нужна позже
 render();
+
+// Проверка появления кнопки пропуска (только локально, без запросов).
+setInterval(mountSkipButton, 20000);
+
+window.__questBooted = true;
 </script>
 </body>
 </html>
