@@ -753,9 +753,20 @@
   }
   .challenge-list { display: flex; flex-direction: column; gap: 6px; }
   .challenge-item {
-    display: grid; grid-template-columns: 22px 28px 1fr auto; gap: 8px;
-    padding: 7px 8px; border-radius: 9px; background: var(--bg);
-    font-size: .78rem; line-height: 1.4;
+    display: grid;
+    grid-template-columns: 22px 28px minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 7px 8px;
+    border-radius: 9px;
+    background: var(--bg);
+    font-size: .78rem;
+    line-height: 1.4;
+  }
+  /* Длинные описания не должны растягивать карточку за пределы экрана. */
+  .challenge-item > div:nth-child(3) {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
   .challenge-number {
     font-family: var(--mono); font-weight: 700; color: var(--ink-soft); text-align: center;
@@ -763,7 +774,13 @@
   .challenge-item.done { background: var(--ok-bg); }
   .challenge-item .mark { font-weight: 800; color: var(--ink-soft); text-align: center; }
   .challenge-item.done .mark { color: var(--ok); }
-  .challenge-item .note { color: var(--ink-soft); font-size: .7rem; margin-top: 2px; }
+  .challenge-item .note {
+    color: var(--ink-soft);
+    font-size: .7rem;
+    margin-top: 2px;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
   .challenge-points { font-family: var(--mono); font-weight: 700; color: var(--accent); white-space: nowrap; text-align: right; }
   .challenge-deadline { margin-top: 9px; color: var(--ink-soft); font-family: var(--mono); font-size: .65rem; text-align: center; }
   .challenge-drawer.complete .challenge-tab { border-color: var(--ok); }
