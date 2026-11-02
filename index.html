@@ -1816,6 +1816,15 @@ const CONFIG = {
   clickerSeconds: 20,           // вопрос 8: длительность кликера
   botName: '@St0rytell3rBot',   // вопрос 15
 
+  // I-14: когда работает подсветка и «7» (часы устройства игрока).
+  // Сейчас окно 14:00:00 - 14:01:59 (до 14:02). toMinute включительно: 0 = только 14:00, 2 = до 14:02:59, 59 = весь 14-й час.
+  q14: { hour: 14, fromMinute: 0, toMinute: 1 },
+  // ТЕСТ (+ панель диагностики на вопросе 14). Перед публикацией верни false!
+  //   false   - обычная работа: только в окне q14 (минута 14:00)
+  //   'cycle' - тест цикла: минута «можно» (чётные минуты на часах), минута «нельзя», и так по кругу
+  //   true    - всегда «можно» (подсветка и 7 работают в любое время)
+  q14Test: false,
+
   // Титры (кнопка на финальном экране III)
   creditsVideoUrl: 'video/credits.mp4',  // положи видео сюда (mp4, H.264 + AAC). Нет файла - титры пойдут без видео
   creditsFallbackSeconds: 70,            // длительность титров, если видео нет или не загрузилось
@@ -5602,6 +5611,7 @@ function renderQuestion() {
   if (q.n === 14) {
     mountQ14TimeCue(card);
     mountSnakeHotkey(q, slot(q.n));
+    mountQ14Debug(card, q);
   }
 }
 
@@ -7083,45 +7093,109 @@ function triggerV3Sequence() {
 }
 
 // I-14: единая локальная проверка «сейчас 14:00» (часы устройства, окно — вся минута 14:00).
+// Приводит CONFIG.q14Test к false / true / 'cycle' (строки 'false', '0', '' тоже считаются «выключено»).
+function q14Mode() {
+  if (!window.__q14Logged) { window.__q14Logged = true; console.log('[q14] build 7, q14Test =', CONFIG.q14Test); }
+  const v = CONFIG.q14Test;
+  if (v === 'cycle') return 'cycle';
+  if (v === true || v === 'true') return true;
+  return false;
+}
+
 function isQ14Time() {
+  const mode = q14Mode();
+  if (mode === 'cycle') return new Date().getMinutes() % 2 === 0;
+  if (mode === true) return true;
+  const w = CONFIG.q14 || { hour: 14, fromMinute: 0, toMinute: 0 };
   const now = new Date();
-  return now.getHours() === 14 && now.getMinutes() === 0;
+  return now.getHours() === w.hour && now.getMinutes() >= w.fromMinute && now.getMinutes() <= w.toMinute;
+}
+
+// Диагностика (только при CONFIG.q14Test = true): показывает, какое условие не выполняется
+// и какие источники тиков (worker / interval / rAF / события) реально живы.
+const Q14DBG = { w: 0, i: 0, r: 0, e: 0, lw: 0, li: 0, lr: 0, paint: null };
+function mountQ14Debug(card, q) {
+  if (!q14Mode()) return;
+  const box = document.createElement('pre');
+  box.style.cssText = 'font:12px/1.5 monospace;background:#111;color:#0f0;padding:8px 10px;border-radius:8px;margin:12px 0 0;white-space:pre-wrap';
+  card.appendChild(box);
+  const ago = t => t ? (Date.now() - t) + ' мс назад' : 'ни разу';
+  const paint = () => {
+    if (!box.isConnected) return;
+    const d = new Date();
+    box.textContent =
+      'время устройства: ' + d.toLocaleTimeString() + '\n' +
+      'S.unlocked (Версия II открыта): ' + S.unlocked + '\n' +
+      'S.screen: ' + S.screen + ' | S.index: ' + S.index + ' | q.n: ' + q.n + '\n' +
+      'isQ14Time: ' + isQ14Time() + '\n' +
+      'класс подсветки: ' + card.classList.contains('q14-time-active') + '\n' +
+      'вкладка скрыта: ' + document.hidden + ' | фокус окна: ' + document.hasFocus() + '\n' +
+      'worker: ' + Q14DBG.w + ' тиков, последний ' + ago(Q14DBG.lw) + '\n' +
+      'interval: ' + Q14DBG.i + ' тиков, последний ' + ago(Q14DBG.li) + '\n' +
+      'rAF: ' + Q14DBG.r + ' кадров, последний ' + ago(Q14DBG.lr);
+  };
+  Q14DBG.paint = paint;
+  const loop = () => { if (!box.isConnected) return; Q14DBG.r++; Q14DBG.lr = Date.now(); paint(); requestAnimationFrame(loop); };
+  loop();
+  paint();
 }
 
 // Подсветка I-14 доступна только после разблокировки Версии II.
-// Проверяем часто (каждые 150 мс) и дополнительно при возвращении на вкладку/в окно:
-// в фоне браузеры замедляют setInterval, из-за этого подсветка «мигала» или не появлялась.
+// Chromium (Chrome, Opera GX) агрессивно усыпляет setInterval и requestAnimationFrame, когда окно
+// не в фокусе/перекрыто или включены режимы экономии ресурсов, - поэтому подсветка «мигала».
+// Защита от этого: тикер в Web Worker (его не троттлят), точный таймер на границу минуты
+// и перепроверка по любому действию игрока и по возврату на вкладку.
 function mountQ14TimeCue(card) {
-  let timerId = null;
-  let rafId = null;
+  let timerId = null, worker = null, edgeId = null, lastEvt = 0;
+  const evts = ['mousemove', 'pointerdown', 'keydown', 'focusin', 'touchstart'];
 
   function stop() {
     window.clearInterval(timerId);
-    if (rafId) cancelAnimationFrame(rafId);
+    window.clearTimeout(edgeId);
+    if (worker) { try { worker.terminate(); } catch (_) {} worker = null; }
     document.removeEventListener('visibilitychange', updateCue);
     window.removeEventListener('focus', updateCue);
     window.removeEventListener('pageshow', updateCue);
+    evts.forEach(ev => document.removeEventListener(ev, onEvt, true));
   }
 
   function updateCue() {
     if (!card.isConnected) { stop(); return; }
+    if (Q14DBG.paint) Q14DBG.paint();
     const shouldGlow = !!S.unlocked && isQ14Time();
     if (card.classList.contains('q14-time-active') !== shouldGlow) {
       card.classList.toggle('q14-time-active', shouldGlow);
     }
+    scheduleEdge();
   }
 
-  function rafLoop() {
+  function onEvt() {
+    const t = Date.now();
+    if (t - lastEvt < 100) return;
+    lastEvt = t;
     updateCue();
-    if (card.isConnected) rafId = requestAnimationFrame(rafLoop);
+  }
+
+  // Таймер ровно на ближайшую смену минуты (начало и конец окна).
+  function scheduleEdge() {
+    window.clearTimeout(edgeId);
+    const ms = 60000 - (Date.now() % 60000) + 30;
+    edgeId = window.setTimeout(updateCue, Math.min(ms, 60000));
   }
 
   updateCue();
-  timerId = window.setInterval(updateCue, 150);
-  rafId = requestAnimationFrame(rafLoop); // дублирует таймер, пока вкладка активна
+  timerId = window.setInterval(() => { Q14DBG.i++; Q14DBG.li = Date.now(); updateCue(); }, 250);
+  try {
+    const src = 'setInterval(function(){postMessage(1)},250)';
+    const url = URL.createObjectURL(new Blob([src], { type: 'application/javascript' }));
+    worker = new Worker(url);
+    URL.revokeObjectURL(url);
+    worker.onmessage = () => { Q14DBG.w++; Q14DBG.lw = Date.now(); updateCue(); };
+  } catch (_) { worker = null; }
   document.addEventListener('visibilitychange', updateCue);
   window.addEventListener('focus', updateCue);
   window.addEventListener('pageshow', updateCue);
+  evts.forEach(ev => document.addEventListener(ev, onEvt, true));
 }
 
 function mountSnakeHotkey(q, st) {
