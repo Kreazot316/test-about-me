@@ -1859,7 +1859,7 @@ const CONFIG = {
   preodolevatelStart: '2026-10-31T00:00:00+02:00',
   preodolevatelEnd: '2026-11-05T00:00:00+02:00',      // до этого момента «Преодолеватель» ещё можно проходить
   preodolevatelDeadline: '2026-11-04T00:00:00+02:00', // срок для таймера: до 04.11, не включая этот день
-  preodolevatelRequiredPoints: 150, // сколько баллов нужно набрать; при необходимости поменяй здесь
+  preodolevatelRequiredPoints: 180, // сколько баллов нужно набрать; при необходимости поменяй здесь
   preodolevatelRefreshMs: 10000,
   
   birthdayStart: '2026-11-04T00:00:00+02:00',
@@ -4902,30 +4902,6 @@ const TERMINAL_MESSAGES = [
   'Я бы на твоём месте проверил ещё раз.',
   'Не отвлекайся на меня. Хотя я рад вниманию.',
   'Каждая ошибка - тоже шаг вперёд. Вроде бы.',
-  'Ты ещё не устал? Я - нет.',
-  'Мне нравится, как ты щёлкаешь по кнопкам.',
-  'Ты замечаешь мелочи. Продолжай.',
-  'Иногда пустое место - тоже улика.',
-  'Если запутался - прочитай экран ещё раз. Медленно.',
-  'Каждое слово имеет свой вес.',
-  'Я бы тоже не сразу догадался.',
-  'Одна голова - хорошо. Четырнадцать - уже слишком.',
-  'Обсуди это с кем-нибудь. Я не обижусь.',
-  'Ты не обязан решать всё за один присест.',
-  'Сходи за чаем. Загадки никуда не убегут.',
-  'Скоро кое-что случится. Ты, наверное, уже знаешь, что.',
-  'Вспомни, что было в начале. Там многое осталось.',
-  'Первая часть не закончилась. Она просто тихо стоит за спиной.',
-  'Не забывай моргать.',
-  'Иногда стоит приглядеться к тому, что уже видел.',
-  'Ты тоже иногда разговариваешь с экраном? Я никому не скажу.',
-  'Завершаю диагностику. Всё в норме. Почти.',
-  'Это не ошибка. Это стиль.',
-  'Не злись на загадку. Она же не нарочно.',
-  'Не всё, что ты ищешь, лежит на этой странице.',
-  'Эта запись не попадёт в архив. Наверное.',
-  'ПРОВЕРКА СВЯЗИ... ПРОВЕРКА... ТЫ ЕЩЁ ТУТ?',
-  'Всё идёт по плану. Моему. Ты в нём тоже есть.',
 ];
 
 const TERM = { timer: null, hideTimer: null, typing: null, log: [], openUntil: 0 };
@@ -7106,66 +7082,78 @@ function triggerV3Sequence() {
   finishTimer = setTimeout(finishWhite, fadeInDuration + 500);
 }
 
+// I-14: единая локальная проверка «сейчас 14:00» (часы устройства, окно — вся минута 14:00).
+function isQ14Time() {
+  const now = new Date();
+  return now.getHours() === 14 && now.getMinutes() === 0;
+}
+
 // Подсветка I-14 доступна только после разблокировки Версии II.
-// Она активна в течение минуты 14:00 по локальным часам устройства и повторяется ежедневно.
+// Проверяем часто (каждые 150 мс) и дополнительно при возвращении на вкладку/в окно:
+// в фоне браузеры замедляют setInterval, из-за этого подсветка «мигала» или не появлялась.
 function mountQ14TimeCue(card) {
   let timerId = null;
+  let rafId = null;
+
+  function stop() {
+    window.clearInterval(timerId);
+    if (rafId) cancelAnimationFrame(rafId);
+    document.removeEventListener('visibilitychange', updateCue);
+    window.removeEventListener('focus', updateCue);
+    window.removeEventListener('pageshow', updateCue);
+  }
 
   function updateCue() {
-    if (!card.isConnected) {
-      window.clearInterval(timerId);
-      return;
+    if (!card.isConnected) { stop(); return; }
+    const shouldGlow = !!S.unlocked && isQ14Time();
+    if (card.classList.contains('q14-time-active') !== shouldGlow) {
+      card.classList.toggle('q14-time-active', shouldGlow);
     }
+  }
 
-    const now = new Date();
-    const shouldGlow = S.unlocked && now.getHours() === 14 && now.getMinutes() === 0;
-    card.classList.toggle('q14-time-active', shouldGlow);
+  function rafLoop() {
+    updateCue();
+    if (card.isConnected) rafId = requestAnimationFrame(rafLoop);
   }
 
   updateCue();
-  timerId = window.setInterval(updateCue, 1000);
+  timerId = window.setInterval(updateCue, 150);
+  rafId = requestAnimationFrame(rafLoop); // дублирует таймер, пока вкладка активна
+  document.addEventListener('visibilitychange', updateCue);
+  window.addEventListener('focus', updateCue);
+  window.addEventListener('pageshow', updateCue);
 }
 
 function mountSnakeHotkey(q, st) {
+  const onQ14 = () => S.unlocked && S.screen === 'quiz' && q.n === 14 && S.index === 13;
+
+  // «7» с любой клавиши: и верхний ряд цифр, и Numpad. Условия те же:
+  // открыта Версия II, открыт I-14, сейчас 14:00 по локальным часам.
   snakeKeyHandler = (e) => {
-    // Надёжно определяем именно клавишу 7 на цифровом блоке.
-    // Основной вариант — code=Numpad7; location=3 покрывает браузеры/раскладки,
-    // где клавиша приходит с другим key, но всё ещё определяется как numpad.
-    const isNumpad7 = e.code === 'Numpad7' || (e.location === 3 && e.key === '7');
-    if (!isNumpad7) return;
+    const is7 = e.code === 'Numpad7' || e.code === 'Digit7' || e.key === '7';
+    if (!is7 || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (!onQ14() || !isQ14Time() || document.querySelector('.snake-overlay')) return;
 
-    // Все условия должны выполняться одновременно:
-    // 1) открыта Версия II;
-    // 2) открыт 14-й вопрос первой версии;
-    // 3) у пользователя сейчас ровно 14:00 по локальным часам;
-    // 4) нажата Numpad 7.
-    if (!S.unlocked || S.screen !== 'quiz' || q.n !== 14 || S.index !== 13) return;
-
-    const currentTime = new Date();
-    const is1400 = currentTime.getHours() === 14 && currentTime.getMinutes() === 0;
-    if (!is1400 || document.querySelector('.snake-overlay')) return;
+    // Если игрок уже печатает ответ (в поле есть текст), «7» — обычная цифра.
+    const t = e.target;
+    if (t && t.tagName === 'INPUT' && String(t.value || '').trim() !== '') return;
 
     e.preventDefault();
     launchSnake(q, st);
   };
   document.addEventListener('keydown', snakeKeyHandler);
 
-  // Телефоны: экранная клавиатура не шлёт Numpad7, поэтому просто «7» в поле ответа
-  // (те же условия: 14-й вопрос и ровно 14:00). Только для сенсорных устройств.
-  const isPhone = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
-  if (isPhone) {
-    const field = app.querySelector('input[type="text"]');
-    if (field) {
-      field.addEventListener('input', () => {
-        if (field.value.trim() !== '7') return;
-        if (!S.unlocked || S.screen !== 'quiz' || q.n !== 14 || S.index !== 13) return;
-        const t = new Date();
-        if (!(t.getHours() === 14 && t.getMinutes() === 0) || document.querySelector('.snake-overlay')) return;
-        field.value = '';
-        field.blur();
-        launchSnake(q, st);
-      });
-    }
+  // Запасной путь (экранная клавиатура, Android с key="Unidentified"):
+  // если в пустом поле оказалась ровно «7» — тоже запускаем змейку.
+  const field = app.querySelector('input[type="text"]');
+  if (field) {
+    field.addEventListener('input', () => {
+      if (field.value.trim() !== '7') return;
+      if (!onQ14() || !isQ14Time() || document.querySelector('.snake-overlay')) return;
+      field.value = '';
+      field.blur();
+      launchSnake(q, st);
+    });
   }
 }
 
