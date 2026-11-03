@@ -1564,8 +1564,8 @@ body.epic-shake-long {
     padding-top: env(safe-area-inset-top, 0px); animation: creditsIn 1.2s ease both;
   }
   .credits-video { flex: none; width: 100%; max-width: 920px; padding: 14px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; position: relative; transition: opacity 1.2s ease; }
-  .credits-video video { display: block; max-width: 100%; max-height: 46vh; background: #000; border-radius: 18px; overflow: hidden; box-shadow: 0 16px 44px -18px rgba(0,0,0,.85); }
-  .credits-play { position: absolute; background: rgba(255,255,255,.92); color: #2f2038; border-radius: 99px; padding: 14px 26px; font-size: 1.05rem; }
+  .credits-video canvas { display: block; max-width: 100%; }
+  .credits-play { position: absolute; background: rgba(255,255,255,.92); color: #2f2038; border-radius: 99px; padding: 14px 26px; font-size: 1.05rem; z-index: 2; }
   .credits-view {
     position: relative; flex: 1; width: min(640px, 100%); overflow: hidden; transition: opacity 1.2s ease;
     -webkit-mask-image: linear-gradient(transparent, #000 14%, #000 86%, transparent);
@@ -1826,7 +1826,12 @@ const CONFIG = {
   q14Test: false,
 
   // Титры (кнопка на финальном экране III)
-  creditsVideoUrl: 'video/credits.mp4',  // положи видео сюда (mp4, H.264 + AAC). Нет файла - титры пойдут без видео
+  creditsMusicUrl: 'audio/credits.mp3',        // фон титров: титры идут, пока он играет
+  creditsTalkUrl: 'audio/credits_talk.mp3',    // голос, включается поверх, если игрок НЕ пропускал квест
+  creditsLogoUrl: 'favicon.png',               // логотип в центре визуализатора
+  creditsLogoDelay: 12,                        // на какой секунде credits.mp3 появляется логотип
+  creditsEndSilenceMs: 3500,                   // сколько висит «Спасибо, что ты здесь» в тишине
+  creditsFallbackSeconds: 70,                  // если credits.mp3 не загрузился
   creditsFallbackSeconds: 70,            // длительность титров, если видео нет или не загрузилось
   creditsTitle: 'Опросик в честь 20-летия',
   creditsRoles: [                        // [должность, имя] - правь как хочешь
@@ -5046,6 +5051,7 @@ function mountSkipButton() {
   b.addEventListener('click', () => {
     if (!window.confirm('Пропустить весь квест и перейти сразу к версии III?')) return;
     closeSoftKeyboard();
+    try { localStorage.setItem('quest_skipped_' + storeKey(S.nick), '1'); } catch (e) {}
     stopChallengePolling();
     S.screen = 'v3transition';
     S.v3Index = 0;
@@ -7494,20 +7500,24 @@ function buildOwnerWindows(wrap, answers) {
 
 /* ---------- Титры: видео сверху, медленные титры снизу ---------- */
 let CREDITS_PENDING = false;
+function skipWasPressed() {
+  try { return !!localStorage.getItem('quest_skipped_' + storeKey(S.nick)); } catch (e) { return false; }
+}
+
 function startCredits(onDone) {
   if (document.querySelector('.credits-screen')) return;
+  const withTalk = !skipWasPressed() && !!CONFIG.creditsTalkUrl;
+
   const ov = el('div', 'credits-screen');
   const vbox = el('div', 'credits-video');
-  const video = document.createElement('video');
-  video.playsInline = true; video.setAttribute('playsinline', ''); video.setAttribute('webkit-playsinline', '');
-  video.preload = 'auto';
-  vbox.appendChild(video);
+  const canvas = document.createElement('canvas');
+  vbox.appendChild(canvas);
   const view = el('div', 'credits-view');
   const roll = el('div', 'credits-roll');
   const line = (cls, t) => { const d = el('div', cls); d.textContent = t; roll.appendChild(d); return d; };
   line('c-title', CONFIG.creditsTitle);
   (CONFIG.creditsRoles || []).forEach(r => { line('c-role', r[0]); line('c-name', r[1]); });
-  // Ники других игроков (из таблицы, поле players). Ник самого игрока сюда не попадает - он в «Отдельное спасибо».
+
   const rawPlayers = CONFIG.creditsInspirers === 'auto'
     ? ((FINALE && Array.isArray(FINALE.players)) ? FINALE.players : [])
     : (Array.isArray(CONFIG.creditsInspirers) ? CONFIG.creditsInspirers : []);
@@ -7523,7 +7533,6 @@ function startCredits(onDone) {
   if (players.length && !secs.some(x => x[0] === 'В ролях')) { line('c-role', 'В ролях'); players.forEach(n => line('c-name', n)); }
   let thanksDone = false;
   secs.forEach(sec => {
-    // Блок «В ролях»: при 'auto' берём настоящие ники; если они не пришли - блок целиком пропускаем (без заглушек).
     const isCast = sec[0] === 'В ролях' && CONFIG.creditsInspirers === 'auto';
     if (isCast && !players.length) return;
     line('c-role', sec[0]);
@@ -7535,60 +7544,175 @@ function startCredits(onDone) {
   view.appendChild(roll);
   ov.append(vbox, view);
 
-  let hasVideo = !!CONFIG.creditsVideoUrl, rollAnim = null, rollDone = false, videoDone = false, finished = false;
+  let rollAnim = null, finished = false, raf = 0, endTimer = null;
   const skip = el('button', 'credits-skip', 'Пропустить ›');
   skip.style.display = 'none';
   ov.appendChild(skip);
   setTimeout(() => { if (!finished) skip.style.display = ''; }, 4000);
 
+  /* ---------- Аудио + анализаторы ---------- */
+  const actx = audioResume();
+  function makeTrack(url, vol, fftSize, smoothing) {
+    const a = new Audio();
+    a.preload = 'auto';
+    a.loop = false;
+    let analyser = null, nodes = [];
+    if (actx) {
+      try {
+        const src = actx.createMediaElementSource(a);
+        analyser = actx.createAnalyser();
+        analyser.fftSize = fftSize;
+        analyser.smoothingTimeConstant = smoothing;
+        const g = actx.createGain();
+        g.gain.value = vol;
+        src.connect(analyser); analyser.connect(g); g.connect(actx.destination);
+        nodes = [src, analyser, g];
+      } catch (_) { analyser = null; }
+    }
+    if (!analyser) a.volume = vol;
+    a.addEventListener('error', () => {
+      if (url.startsWith('audio/') && !a.dataset.fb) { a.dataset.fb = '1'; a.src = url.slice(6); a.load(); }
+    });
+    a.src = url;
+    return { a, analyser, nodes };
+  }
+  const music = makeTrack(CONFIG.creditsMusicUrl, 0.8, 512, 0.8);
+  const talk = withTalk ? makeTrack(CONFIG.creditsTalkUrl, 1, 1024, 0.5) : null;
+
+  /* ---------- Визуализатор ---------- */
+  const logo = new Image();
+  logo.src = CONFIG.creditsLogoUrl;
+  const cx = canvas.getContext('2d');
+  const BARS = 96;
+  const freq = music.analyser ? new Uint8Array(music.analyser.frequencyBinCount) : null;
+  const tbuf = (talk && talk.analyser) ? new Uint8Array(talk.analyser.fftSize) : null;
+  let level = 0, logoAlpha = 0, side = 0, dpr = 1;
+
+  function fit() {
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    const s = Math.max(120, Math.round(Math.min(vbox.clientWidth - 28, window.innerHeight * 0.46)));
+    if (s !== side) {
+      side = s;
+      canvas.style.width = side + 'px';
+      canvas.style.height = side + 'px';
+      canvas.width = Math.round(side * dpr);
+      canvas.height = Math.round(side * dpr);
+    }
+  }
+
+  function draw() {
+    raf = requestAnimationFrame(draw);
+    fit();
+    const t = performance.now() / 1000;
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cx.clearRect(0, 0, side, side);
+    const c = side / 2;
+    const innerR = side * 0.27, maxLen = side * 0.2;
+
+    // Кольцо: реагирует только на credits.mp3
+    if (freq) music.analyser.getByteFrequencyData(freq);
+    cx.lineCap = 'round';
+    cx.lineWidth = Math.max(2, side * 0.012);
+    for (let i = 0; i < BARS; i++) {
+      const k = i < BARS / 2 ? i : BARS - 1 - i;      // зеркально, чтобы кольцо было симметричным
+      let v;
+      if (freq) {
+        const bin = 2 + Math.floor(k / (BARS / 2) * freq.length * 0.6);
+        v = Math.pow(freq[bin] / 255, 1.15);
+      } else {
+        v = 0.15 + 0.1 * Math.sin(t * 2 + k * 0.4);   // запасной вариант без Web Audio
+      }
+      const a = i / BARS * Math.PI * 2 - Math.PI / 2;
+      const r1 = innerR, r2 = innerR + 3 + v * maxLen;
+      cx.strokeStyle = 'hsl(' + Math.round(272 - v * 232) + ',85%,' + Math.round(62 + v * 10) + '%)';
+      cx.beginPath();
+      cx.moveTo(c + Math.cos(a) * r1, c + Math.sin(a) * r1);
+      cx.lineTo(c + Math.cos(a) * r2, c + Math.sin(a) * r2);
+      cx.stroke();
+    }
+
+    // Логотип: появляется на creditsLogoDelay-й секунде credits.mp3, пульсирует от credits_talk.mp3
+    const showLogo = music.a.currentTime >= CONFIG.creditsLogoDelay;
+    logoAlpha += ((showLogo ? 1 : 0) - logoAlpha) * 0.06;
+    let raw = 0;
+    if (tbuf && !talk.a.paused && !talk.a.ended) {
+      talk.analyser.getByteTimeDomainData(tbuf);
+      let sum = 0;
+      for (let i = 0; i < tbuf.length; i++) { const x = (tbuf[i] - 128) / 128; sum += x * x; }
+      raw = Math.min(1, Math.sqrt(sum / tbuf.length) * 3.4);
+    }
+    level += (raw - level) * (raw > level ? 0.5 : 0.12);  // быстро растёт, плавно опадает
+    if (logoAlpha > 0.01 && logo.complete && logo.naturalWidth) {
+      const d = side * 0.34 * (1 + 0.3 * level);
+      cx.save();
+      cx.globalAlpha = logoAlpha;
+      cx.shadowColor = 'rgba(242,183,5,.75)';
+      cx.shadowBlur = (8 + 30 * level) * logoAlpha;
+      cx.drawImage(logo, c - d / 2, c - d / 2, d, d);
+      cx.restore();
+    }
+  }
+
+  /* ---------- Титры, финиш ---------- */
   function finish() {
     if (finished) return;
     finished = true;
-    try { video.pause(); } catch (_) {}
+    cancelAnimationFrame(raf);
+    clearTimeout(endTimer);
+    [music, talk].forEach(tr => {
+      if (!tr) return;
+      try { tr.a.pause(); } catch (_) {}
+      tr.nodes.forEach(n => { try { n.disconnect(); } catch (_) {} });
+    });
     if (rollAnim) rollAnim.cancel();
     skip.remove();
-    if (onDone) onDone(); // под титрами уже появляется личное сообщение
+    if (onDone) onDone();
     ov.style.animation = 'creditsOut 1.6s ease forwards';
     setTimeout(() => ov.remove(), 1700);
   }
-  const tryFinish = () => { if (rollDone && (videoDone || !hasVideo)) finish(); };
+
   function startRoll(secs) {
     if (rollAnim || finished) return;
-    // Титры ползут почти всю длину видео и останавливаются, когда последняя строка стоит по центру.
-    // Большой отступ перед последней строкой: когда она по центру, все остальные титры уже ушли за экран.
     endEl.style.marginTop = Math.round(view.clientHeight * 0.65) + 'px';
     const dist = view.clientHeight / 2 + endEl.offsetTop + endEl.offsetHeight / 2;
-    const dur = Math.max(secs - 6, secs * 0.8); // последние секунды: пауза на последней строке и медленное затухание
-    rollAnim = roll.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-' + dist + 'px)' }], { duration: dur * 1000, easing: 'linear', fill: 'forwards' });
-    rollAnim.onfinish = () => {
-      endEl.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 3500, delay: 1200, easing: 'ease-in', fill: 'forwards' });
-      // С видео ждём его конца; без видео - пока строка не угаснет.
-      setTimeout(() => { rollDone = true; tryFinish(); }, hasVideo ? 0 : 4800);
-    };
+    // Титры доезжают до последней строки ровно к концу музыки и там остаются
+    rollAnim = roll.animate(
+      [{ transform: 'translateY(0)' }, { transform: 'translateY(-' + dist + 'px)' }],
+      { duration: secs * 1000, easing: 'linear', fill: 'forwards' }
+    );
+  }
+
+  function onMusicEnded() {
+    if (rollAnim) { try { rollAnim.finish(); } catch (_) {} }
+    clearTimeout(endTimer);
+    // Тишина: строка «Спасибо, что ты здесь» висит ещё пару секунд, потом финальный экран
+    endTimer = setTimeout(finish, CONFIG.creditsEndSilenceMs || 3500);
   }
 
   document.body.appendChild(ov);
-  stopV3Music(); // у видео своя музыка
+  stopV3Music();
   stopMemories();
+  fit();
+  draw();
 
-  if (!hasVideo) { setTimeout(() => startRoll(CONFIG.creditsFallbackSeconds), 60); return; }
-  video.addEventListener('playing', () => startRoll(isFinite(video.duration) && video.duration > 5 ? video.duration : CONFIG.creditsFallbackSeconds), { once: true });
-  // Рамка ровно по размеру видео (без чёрных полей): считаем размер по пропорциям ролика.
-  video.addEventListener('loadedmetadata', () => {
-    if (!video.videoWidth || !video.videoHeight) return;
-    const r = video.videoWidth / video.videoHeight;
-    video.style.aspectRatio = String(r);
-    video.style.height = 'auto';
-    video.style.width = 'min(100%, ' + (46 * r).toFixed(2) + 'vh)';
+  music.a.addEventListener('playing', () => {
+    startRoll(isFinite(music.a.duration) && music.a.duration > 5 ? music.a.duration : CONFIG.creditsFallbackSeconds);
+    if (talk) { try { talk.a.currentTime = 0; } catch (_) {} talk.a.play().catch(() => {}); }
+  }, { once: true });
+  music.a.addEventListener('ended', onMusicEnded);
+  music.a.addEventListener('error', () => {
+    // credits.mp3 не загрузился: идём по таймеру
+    if (music.a.dataset.fb && music.a.error) return;  // ещё пробуем путь без "audio/"
+    startRoll(CONFIG.creditsFallbackSeconds);
+    clearTimeout(endTimer);
+    endTimer = setTimeout(finish, CONFIG.creditsFallbackSeconds * 1000 + (CONFIG.creditsEndSilenceMs || 3500));
   });
-  video.addEventListener('ended', () => { videoDone = true; tryFinish(); });
-  video.addEventListener('error', () => { hasVideo = false; vbox.style.display = 'none'; startRoll(CONFIG.creditsFallbackSeconds); });
   skip.addEventListener('click', finish);
-  video.src = CONFIG.creditsVideoUrl;
-  const pr = video.play();
+
+  const pr = music.a.play();
   if (pr && pr.catch) pr.catch(() => {
-    const b = el('button', 'credits-play', '▶ Запустить'); // браузер не дал автозапуск со звуком
-    b.addEventListener('click', () => { b.remove(); video.play().catch(() => {}); });
+    const b = el('button', 'credits-play', '▶ Запустить');   // если браузер не дал автозапуск со звуком
+    b.addEventListener('click', () => { b.remove(); audioResume(); music.a.play().catch(() => {}); });
     vbox.appendChild(b);
   });
 }
